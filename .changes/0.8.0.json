@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Enabled autocompletion by default",
+    "type": "minor"
+  }
+]

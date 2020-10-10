@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Fix bug: add require module in setup.py",
+    "type": "patch"
+  }
+]

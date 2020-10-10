@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Use jinja2 template engine internally to generate the changelog",
+    "type": "patch"
+  },
+  {
+    "description": "Improve README.md documentation",
+    "type": "patch"
+  },
+  {
+    "description": "Fix packaging for LICENSE",
+    "type": "patch"
+  }
+]

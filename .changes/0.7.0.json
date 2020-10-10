@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Fail with error code when no changes are provided in the release command",
+    "type": "minor"
+  }
+]

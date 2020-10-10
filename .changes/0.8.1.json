@@ -1,0 +1,6 @@
+[
+  {
+    "description": "Fix installer error when referencing to LICENSE file",
+    "type": "patch"
+  }
+]
