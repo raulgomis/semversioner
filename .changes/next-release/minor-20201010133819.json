@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Deprecated .changes directory in favour of .semversioner directory"
-}

@@ -1,9 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
-## 0.8.2
+## 0.9.0
 
-- patch: Minor improvements
+- minor: Deprecated .changes directory in favour of .semversioner directory
+- patch: Internal refactor to improve code quality and test coverage
 
 ## 0.8.1
 
