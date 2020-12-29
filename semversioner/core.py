@@ -12,10 +12,10 @@ DEFAULT_TEMPLATE = """# Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 {% for release in releases %}
 
-## {{ release.id }}
+## {{ release.version }}
 
-{% for data in release.data %}
-- {{ data.type }}: {{ data.description }}
+{% for change in release.changes %}
+- {{ change.type }}: {{ change.description }}
 {% endfor %}
 {% endfor %}
 """
@@ -95,12 +95,7 @@ class Semversioner:
         str
             Changelog string.
         """
-        releases = []
-        for release_identifier in self._sorted_releases():
-            with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
-                data = json.load(f)
-            data = sorted(data, key=lambda k: k['type'] + k['description'])
-            releases.append({'id': release_identifier, 'data': data})
+        releases = self._get_releases()
         return Template(DEFAULT_TEMPLATE, trim_blocks=True).render(releases=releases)
 
     def release(self):
@@ -119,19 +114,15 @@ class Semversioner:
         new_version : str
             New version.
         """
-        changes = []
         next_release_dir = self.next_release_path
-        for filename in os.listdir(next_release_dir):
-            full_path = os.path.join(next_release_dir, filename)
-            with open(full_path) as f:
-                changes.append(json.load(f))
+        changes = self._get_unreleased_changes()
 
         if len(changes) == 0:
             click.secho("Error: No changes to release. Skipping release process.", fg='red')
             sys.exit(-1)
 
         current_version_number = self.get_version()
-        next_version_number = self._get_next_version_number(changes, current_version_number)
+        next_version_number = self.get_next_version(changes, current_version_number)
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
 
         release_json_filename = os.path.join(self.semversioner_path, '%s.json' % next_version_number)
@@ -161,17 +152,51 @@ class Semversioner:
             return releases[0]
         return INITIAL_VERSION
 
+    def get_next_version(self, changes, current_version_number):
+        if len(changes) == 0:
+            return None
+        release_type = sorted(list(map(lambda x: x['type'], changes)))[0]
+        next_version = self._get_next_version_from_type(current_version_number, release_type)
+        return next_version
+
+    def get_status(self):
+        """
+        Displays the status of the working directory.
+        """
+        version = self.get_version()
+        changes = self._get_unreleased_changes()
+        next_version = self.get_next_version(changes, version)
+
+        return {
+            'version': version,
+            'next_version': next_version,
+            'unreleased_changes': changes,
+        }
+
     def _sorted_releases(self):
         files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
-        releases = list(map(lambda x: x[:-len('.json')], files))
-        releases = sorted(releases, key=StrictVersion, reverse=True)
+        releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
         return releases
 
-    def _get_next_version_number(self, changes, current_version_number):
-        release_type = sorted(list(map(lambda x: x['type'], changes)))[0]
-        return self._increase_version(current_version_number, release_type)
+    def _get_releases(self):
+        releases = []
+        for release_identifier in self._sorted_releases():
+            with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
+                data = json.load(f)
+            data = sorted(data, key=lambda k: k['type'] + k['description'])
+            releases.append({'version': release_identifier, 'changes': data})
+        return releases
 
-    def _increase_version(self, current_version, release_type):
+    def _get_unreleased_changes(self):
+        changes = []
+        next_release_dir = self.next_release_path
+        for filename in os.listdir(next_release_dir):
+            full_path = os.path.join(next_release_dir, filename)
+            with open(full_path) as f:
+                changes.append(json.load(f))
+        return changes
+
+    def _get_next_version_from_type(self, current_version, release_type):
         """ 
         Returns a string like '1.0.0'.
         """
