@@ -110,4 +110,3 @@ Unreleased changes:
 \tminor:\tThis is my minor description
 (use "semversioner release" to release the next version)
 """
-

@@ -83,6 +83,7 @@ def cli_current_version(ctx):
     version = releaser.get_version()
     click.echo(message=version)
 
+
 @cli.command('status', help="Show the status of the working directory.")
 @click.pass_context
 def status(ctx):
@@ -91,15 +92,14 @@ def status(ctx):
     next_version = releaser.get_status()['next_version']
     unreleased_changes = releaser.get_status()['unreleased_changes']
     click.echo(message=f"Version: {version}")
-    if  len(unreleased_changes) > 0:
+    if len(unreleased_changes) > 0:
         click.echo(message=f"Next version: {next_version}")
-        click.echo(message=f"Unreleased changes:")
+        click.echo(message="Unreleased changes:")
         for change in unreleased_changes:
             click.secho(message=f"\t{change['type']}:\t{change['description']}", fg="red")
         click.echo(message="(use \"semversioner release\" to release the next version)")
     else:
-        click.echo(message=f"No changes to release (use \"semversioner add-change\")")
-
+        click.echo(message="No changes to release (use \"semversioner add-change\")")
 
 
 def main():
