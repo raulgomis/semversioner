@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Fix build and deployment configuration",
+    "type": "patch"
+  },
+  {
+    "description": "Refactor method names and code for better code readability and testability",
+    "type": "patch"
+  },
+  {
+    "description": "Add new 'status' command to display the state of the working directory and unreleased changes",
+    "type": "minor"
+  }
+]

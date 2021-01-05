@@ -1,6 +1,12 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 0.10.0
+
+- minor: Add new 'status' command to display the state of the working directory and unreleased changes
+- patch: Fix build and deployment configuration
+- patch: Refactor method names and code for better code readability and testability
+
 ## 0.9.0
 
 - minor: Deprecated .changes directory in favour of .semversioner directory
