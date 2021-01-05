@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,7 +29,11 @@ jobs:
         pip install setuptools wheel twine
         pip install -r requirements.txt
         mkdir test-reports
-        nosetests -s --with-xunit --xunit-file=test-reports/test-report.xml 
+        nosetests -s --with-xunit --xunit-file=test-reports/test-report.xml
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: Publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

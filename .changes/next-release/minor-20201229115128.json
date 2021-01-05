@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Add new 'status' command to display the state of the working directory and unreleased changes"
+}

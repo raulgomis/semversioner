@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Refactor method names and code for better code readability and testability"
+}

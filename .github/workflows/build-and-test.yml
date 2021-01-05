@@ -5,7 +5,7 @@ on:
       - 'feature/*'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:

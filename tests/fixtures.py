@@ -94,3 +94,19 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 - minor: Initial version
 """
+
+
+TEST_STATUS_COMMAND_WITH_NO_CHANGES = """Version: 0.0.0
+No changes to release (use "semversioner add-change")
+"""
+
+TEST_STATUS_COMMAND_WITH_RELEASED_CHANGES = """Version: 0.1.0
+No changes to release (use "semversioner add-change")
+"""
+
+TEST_STATUS_COMMAND_WITH_UNRELEASED_CHANGES = """Version: 0.0.0
+Next version: 0.1.0
+Unreleased changes:
+\tminor:\tThis is my minor description
+(use "semversioner release" to release the next version)
+"""

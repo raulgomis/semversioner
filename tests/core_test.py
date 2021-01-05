@@ -24,15 +24,15 @@ class CoreTestCase(unittest.TestCase):
 
     def test_increase_version(self):
         releaser = Semversioner(self.directory_name)
-        self.assertEqual(releaser._increase_version("1.0.0", "minor"), "1.1.0")
-        self.assertEqual(releaser._increase_version("1.0.0", "major"), "2.0.0")
-        self.assertEqual(releaser._increase_version("1.0.0", "patch"), "1.0.1")
-        self.assertEqual(releaser._increase_version("0.1.1", "minor"), "0.2.0")
-        self.assertEqual(releaser._increase_version("0.1.1", "major"), "1.0.0")
-        self.assertEqual(releaser._increase_version("0.1.1", "patch"), "0.1.2")
-        self.assertEqual(releaser._increase_version("9.9.9", "minor"), "9.10.0")
-        self.assertEqual(releaser._increase_version("9.9.9", "major"), "10.0.0")
-        self.assertEqual(releaser._increase_version("9.9.9", "patch"), "9.9.10")
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "minor"), "1.1.0")
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "major"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "patch"), "1.0.1")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "minor"), "0.2.0")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "major"), "1.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "patch"), "0.1.2")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "minor"), "9.10.0")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major"), "10.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
 
     def test_generate_changelog(self):
         releaser = Semversioner(self.directory_name)

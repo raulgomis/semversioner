@@ -84,8 +84,27 @@ def cli_current_version(ctx):
     click.echo(message=version)
 
 
+@cli.command('status', help="Show the status of the working directory.")
+@click.pass_context
+def status(ctx):
+    releaser = ctx.obj['releaser']
+    version = releaser.get_status()['version']
+    next_version = releaser.get_status()['next_version']
+    unreleased_changes = releaser.get_status()['unreleased_changes']
+    click.echo(message=f"Version: {version}")
+    if len(unreleased_changes) > 0:
+        click.echo(message=f"Next version: {next_version}")
+        click.echo(message="Unreleased changes:")
+        for change in unreleased_changes:
+            click.secho(message=f"\t{change['type']}:\t{change['description']}", fg="red")
+        click.echo(message="(use \"semversioner release\" to release the next version)")
+    else:
+        click.echo(message="No changes to release (use \"semversioner add-change\")")
+
+
 def main():
-    cli(obj={})
+    # pylint: disable=no-value-for-parameter
+    cli()
 
 
 if __name__ == '__main__':

@@ -30,6 +30,10 @@ def command_processor(commands, path):
             result = runner.invoke(cli, ['--path', path, "current-version"])
             assert not result.exception
             assert result.exit_code == 0
+        elif command_id == "status":
+            result = runner.invoke(cli, ['--path', path, "status"])
+            assert not result.exception
+            assert result.exit_code == 0
         else:
             print("Unknown command.")
     return result
@@ -154,6 +158,33 @@ class NewDataTestCase(unittest.TestCase):
 
         result = command_processor(commands, self.directory_name)
         self.assertIn("0.1.0", result.output)
+
+    def test_status_command_with_no_changes(self):
+        commands = [
+            {"id": "status"},
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_NO_CHANGES, result.output)
+
+    def test_status_command_with_released_changes(self):
+        commands = [
+            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
+            {"id": "release"},
+            {"id": "status"},
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_RELEASED_CHANGES, result.output)
+
+    def test_status_command_with_unreleased_changes(self):
+        commands = [
+            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
+            {"id": "status"},
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_UNRELEASED_CHANGES, result.output)
 
     def test_cli_version(self):
         runner = CliRunner()
