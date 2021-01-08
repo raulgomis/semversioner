@@ -34,17 +34,21 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major"), "10.0.0")
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
 
-    def test_generate_changelog(self):
+    def test_commands_with_no_changesets(self):
         releaser = Semversioner(self.directory_name)
-        self.assertEqual(releaser.generate_changelog(), """# Changelog
-Note: version releases in the 0.x.y range may introduce breaking changes.
-""")
-
-    def test_empty_release(self):
-        releaser = Semversioner(self.directory_name)
-
+        self.assertEqual(releaser.generate_changelog(), "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
+        self.assertEqual(releaser.get_version(), "0.0.0")
+        self.assertEqual(releaser.get_status(), {
+            'version': '0.0.0',
+            'next_version': None,
+            'unreleased_changes': [],
+        })
         with self.assertRaises(SystemExit):
             releaser.release()
+
+    def test_is_deprecated(self):
+        releaser = Semversioner(self.directory_name)
+        self.assertFalse(releaser.is_deprecated())
 
 
 if __name__ == '__main__':

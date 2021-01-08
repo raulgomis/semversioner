@@ -1,10 +1,8 @@
 import os
 import sys
-import json
 import click
-import datetime
-from distutils.version import StrictVersion
 from jinja2 import Template
+from semversioner.storage import SemversionerFileSystemStorage
 
 ROOTDIR = os.getcwd()
 INITIAL_VERSION = '0.0.0'
@@ -20,32 +18,13 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 {% endfor %}
 """
 
-
 class Semversioner:
 
     def __init__(self, path=ROOTDIR):
-        semversioner_path_legacy = os.path.join(path, '.changes')
-        semversioner_path_new = os.path.join(path, '.semversioner')
-        semversioner_path = semversioner_path_new
-        deprecated = False
-
-        if os.path.isdir(semversioner_path_legacy) and not os.path.isdir(semversioner_path_new):
-            deprecated = True
-            semversioner_path = semversioner_path_legacy
-        if not os.path.isdir(semversioner_path):
-            os.makedirs(semversioner_path)
-
-        next_release_path = os.path.join(semversioner_path, 'next-release')
-        if not os.path.isdir(next_release_path):
-            os.makedirs(next_release_path)
-
-        self.path = path
-        self.semversioner_path = semversioner_path
-        self.next_release_path = next_release_path
-        self.deprecated = deprecated
+        self.fs = SemversionerFileSystemStorage(path=path)
 
     def is_deprecated(self):
-        return self.deprecated
+        return self.fs.is_deprecated()
 
     def add_change(self, change_type, description):
         """ 
@@ -65,23 +44,7 @@ class Semversioner:
             Absolute path of the file generated.
         """
 
-        parsed_values = {
-            'type': change_type,
-            'description': description,
-        }
-
-        filename = None
-        while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
-            filename = '{type_name}-{datetime}.json'.format(
-                type_name=parsed_values['type'],
-                datetime="{:%Y%m%d%H%M%S}".format(datetime.datetime.utcnow()))
-
-        with open(os.path.join(self.next_release_path, filename), 'w') as f:
-            f.write(json.dumps(parsed_values, indent=2) + "\n")
-
-        return { 
-            'path': os.path.join(self.next_release_path, filename)
-        }
+        return self.fs.create_changeset(change_type=change_type, description=description)
 
     def generate_changelog(self):
         """ 
@@ -95,7 +58,7 @@ class Semversioner:
         str
             Changelog string.
         """
-        releases = self._get_releases()
+        releases = self.fs.list_versions()
         return Template(DEFAULT_TEMPLATE, trim_blocks=True).render(releases=releases)
 
     def release(self):
@@ -114,8 +77,7 @@ class Semversioner:
         new_version : str
             New version.
         """
-        next_release_dir = self.next_release_path
-        changes = self._get_unreleased_changes()
+        changes = self.fs.list_changesets()
 
         if len(changes) == 0:
             click.secho("Error: No changes to release. Skipping release process.", fg='red')
@@ -123,19 +85,10 @@ class Semversioner:
 
         current_version_number = self.get_version()
         next_version_number = self.get_next_version(changes, current_version_number)
+
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
-
-        release_json_filename = os.path.join(self.semversioner_path, '%s.json' % next_version_number)
-
-        click.echo("Generated '" + release_json_filename + "' file.")
-        with open(release_json_filename, 'w') as f:
-            f.write(json.dumps(changes, indent=2, sort_keys=True))
-
-        click.echo("Removing '" + next_release_dir + "' directory.")
-        for filename in os.listdir(next_release_dir):
-            full_path = os.path.join(next_release_dir, filename)
-            os.remove(full_path)
-        os.rmdir(next_release_dir)
+        self.fs.create_version(version=next_version_number, changes=changes)
+        self.fs.remove_all_changesets()
 
         return {
             'previous_version': current_version_number,
@@ -147,10 +100,7 @@ class Semversioner:
         Gets the current version.
 
         """
-        releases = self._sorted_releases()
-        if len(releases) > 0:
-            return releases[0]
-        return INITIAL_VERSION
+        return self.fs.get_version() or INITIAL_VERSION
 
     def get_next_version(self, changes, current_version_number):
         if len(changes) == 0:
@@ -164,7 +114,7 @@ class Semversioner:
         Displays the status of the working directory.
         """
         version = self.get_version()
-        changes = self._get_unreleased_changes()
+        changes = self.fs.list_changesets()
         next_version = self.get_next_version(changes, version)
 
         return {
@@ -172,29 +122,6 @@ class Semversioner:
             'next_version': next_version,
             'unreleased_changes': changes,
         }
-
-    def _sorted_releases(self):
-        files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
-        releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
-        return releases
-
-    def _get_releases(self):
-        releases = []
-        for release_identifier in self._sorted_releases():
-            with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
-                data = json.load(f)
-            data = sorted(data, key=lambda k: k['type'] + k['description'])
-            releases.append({'version': release_identifier, 'changes': data})
-        return releases
-
-    def _get_unreleased_changes(self):
-        changes = []
-        next_release_dir = self.next_release_path
-        for filename in os.listdir(next_release_dir):
-            full_path = os.path.join(next_release_dir, filename)
-            with open(full_path) as f:
-                changes.append(json.load(f))
-        return changes
 
     def _get_next_version_from_type(self, current_version, release_type):
         """ 
