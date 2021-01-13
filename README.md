@@ -60,6 +60,18 @@ As a part of your CI/CD workflow, you will be able to generate the Changelog fil
 $ semversioner changelog > CHANGELOG.md
 ```
 
+You can filter the changelog by only showing changes for a specific version:
+
+```shell
+$ semversioner changelog --version "1.0.0"
+```
+
+Alternatively, you can use the following command to filter changes by the last released version:
+
+```shell
+$ semversioner changelog --version $(semversioner current-version)
+```
+
 ## License
 Copyright (c) 2020 Raul Gomis.
 MIT licensed, see [LICENSE](LICENSE) file.

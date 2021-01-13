@@ -59,10 +59,11 @@ def cli_release(ctx):
 
 
 @cli.command('changelog', help="Print the changelog.")
+@click.option('--version', default=None, help="Filter the changelog by version.")
 @click.pass_context
-def cli_changelog(ctx):
+def cli_changelog(ctx, version):
     releaser = ctx.obj['releaser']
-    changelog = releaser.generate_changelog()
+    changelog = releaser.generate_changelog(version=version)
     click.echo(message=changelog, nl=False)
 
 
