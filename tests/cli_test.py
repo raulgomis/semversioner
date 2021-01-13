@@ -13,33 +13,14 @@ def command_processor(commands, path):
     runner = CliRunner()
     result = None
     for command in commands:
-        command_id = command["id"]
-        if command_id == "add-change":
-            result = runner.invoke(cli, ["--path", path, "add-change", "--type", command["type"], "--description", command["description"]])
-            assert not result.exception
-            assert result.exit_code == 0
-        elif command_id == "release":
-            result = runner.invoke(cli, ["--path", path, "release"])
-            assert not result.exception
-            assert result.exit_code == 0
-        elif command_id == "changelog":
-            result = runner.invoke(cli, ["--path", path, "changelog"])
-            assert not result.exception
-            assert result.exit_code == 0
-        elif command_id == "current-version":
-            result = runner.invoke(cli, ['--path', path, "current-version"])
-            assert not result.exception
-            assert result.exit_code == 0
-        elif command_id == "status":
-            result = runner.invoke(cli, ['--path', path, "status"])
-            assert not result.exception
-            assert result.exit_code == 0
-        else:
-            print("Unknown command.")
+        command_with_path = ["--path", path] + command
+        result = runner.invoke(cli, command_with_path)
+        assert not result.exception
+        assert result.exit_code == 0
     return result
 
 
-class NewDataTestCase(unittest.TestCase):
+class CommandTest(unittest.TestCase):
     directory_name = None
     changes_dirname = None
     next_release_dirname = None
@@ -54,11 +35,14 @@ class NewDataTestCase(unittest.TestCase):
         print("Removing directory: " + self.directory_name)
         shutil.rmtree(self.directory_name)
 
+
+class AddChangeCommandTest(CommandTest):
+
     def test_write_new_change(self):
         commands = [
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"}
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -79,11 +63,14 @@ class NewDataTestCase(unittest.TestCase):
         self.assertListEqual(expected, data)
         self.assertRegex(result.output, f"Successfully created file {self.next_release_dirname}.*\\.json")
 
+
+class ChangelogCommandTest(CommandTest):
+
     def test_generate_changelog_empty(self):
         commands = [
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "changelog"}
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -91,9 +78,15 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_single_major(self):
         commands = [
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "release"},
-            {"id": "changelog"}
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["release"],
+            ["changelog"]
+        ]
+
+        commands = [
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["release"],
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -101,9 +94,9 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_single_patch(self):
         commands = [
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"},
-            {"id": "release"},
-            {"id": "changelog"}
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -111,15 +104,22 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_multiple(self):
         commands = [
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"},
-            {"id": "release"},
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "release"},
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "release"},
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "release"},
-            {"id": "changelog"}
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["release"],
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["release"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["release"],
+            ["changelog"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, fixtures.CHANGELOG_3)
+
+        commands = [
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -127,23 +127,41 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_multiple_new(self):  
         commands = [
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"},
-            {"id": "release"},
-            {"id": "add-change", "type": "major", "description": "This is my major description"},
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"},
-            {"id": "release"},
-            {"id": "changelog"}
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_4)
 
+        commands = [
+            ["changelog", "--version", "2.0.0"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, fixtures.CHANGELOG_4_PARTIAL)
+
+    def test_generate_changelog_filtering_non_existing_version(self):
+        commands = [
+            ["changelog", "--version", "2.0.0"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
+
+
+class CurrentVersionCommandTest(CommandTest):
+
     def test_cli_execution_current_version(self):
         commands = [
-            {"id": "current-version"}
+            ["current-version"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -151,17 +169,20 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_cli_execution_add_change(self):
         commands = [
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "release"},
-            {"id": "current-version"}
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["release"],
+            ["current-version"]
         ]
 
         result = command_processor(commands, self.directory_name)
         self.assertIn("0.1.0", result.output)
 
+
+class StatusCommandTest(CommandTest):
+
     def test_status_command_with_no_changes(self):
         commands = [
-            {"id": "status"},
+            ["status"],
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -169,9 +190,9 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_status_command_with_released_changes(self):
         commands = [
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "release"},
-            {"id": "status"},
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["release"],
+            ["status"],
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -179,13 +200,15 @@ class NewDataTestCase(unittest.TestCase):
 
     def test_status_command_with_unreleased_changes(self):
         commands = [
-            {"id": "add-change", "type": "minor", "description": "This is my minor description"},
-            {"id": "status"},
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["status"],
         ]
 
         result = command_processor(commands, self.directory_name)
         self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_UNRELEASED_CHANGES, result.output)
 
+
+class CliVersionCommandTest(CommandTest):
     def test_cli_version(self):
         runner = CliRunner()
         result = runner.invoke(cli=cli, args=['--version'])
@@ -217,7 +240,7 @@ class ExistingDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_single_patch(self):
         commands = [
-            {"id": "changelog"}
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -225,7 +248,7 @@ class ExistingDataTestCase(unittest.TestCase):
 
     def test_cli_execution_current_version(self):
         commands = [
-            {"id": "current-version"}
+            ["current-version"]
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -233,9 +256,9 @@ class ExistingDataTestCase(unittest.TestCase):
 
     def test_generate_changelog_add_new_patch(self):
         commands = [
-            {"id": "add-change", "type": "patch", "description": "This is my patch description"},
-            {"id": "release"},
-            {"id": "changelog"}
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["changelog"]
         ]
 
         result = command_processor(commands, self.directory_name)

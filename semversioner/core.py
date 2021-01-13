@@ -83,7 +83,7 @@ class Semversioner:
             'path': os.path.join(self.next_release_path, filename)
         }
 
-    def generate_changelog(self):
+    def generate_changelog(self, version=None):
         """ 
         Generates the changelog.
 
@@ -96,6 +96,10 @@ class Semversioner:
             Changelog string.
         """
         releases = self._get_releases()
+
+        if version is not None:
+            releases = [x for x in releases if x['version'] == version]
+
         return Template(DEFAULT_TEMPLATE, trim_blocks=True).render(releases=releases)
 
     def release(self):

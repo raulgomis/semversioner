@@ -51,6 +51,16 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 - patch: This is my patch description
 """
 
+CHANGELOG_4_PARTIAL = """# Changelog
+Note: version releases in the 0.x.y range may introduce breaking changes.
+
+## 2.0.0
+
+- major: This is my major description
+- minor: This is my minor description
+- patch: This is my patch description
+"""
+
 # Existing Data Fixtures
 
 VERSION_0_1_0 = """[
