@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 0.11.0
+
+- minor: Add '--version' filter to the 'changelog' command to display the changelog only for a specific version
+
 ## 0.10.0
 
 - minor: Add new 'status' command to display the state of the working directory and unreleased changes

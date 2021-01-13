@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Add '--version' filter to the 'changelog' command to display the changelog only for a specific version"
-}
