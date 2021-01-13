@@ -18,6 +18,7 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 {% endfor %}
 """
 
+
 class Semversioner:
 
     def __init__(self, path=ROOTDIR):

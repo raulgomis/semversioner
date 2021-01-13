@@ -4,7 +4,7 @@ import click
 import datetime
 from distutils.version import StrictVersion
 
-from abc import ABC, abstractmethod, ABCMeta
+from abc import abstractmethod, ABCMeta
 
 
 class SemversionerStorage(metaclass=ABCMeta):
