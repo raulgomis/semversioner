@@ -81,7 +81,7 @@ def cli_add_change(ctx, type, description):
 @click.pass_context
 def cli_current_version(ctx):
     releaser = ctx.obj['releaser']
-    version = releaser.get_version()
+    version = releaser.get_last_version()
     click.echo(message=version)
 
 

@@ -35,9 +35,9 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
 
     def test_commands_with_no_changesets(self):
-        releaser = Semversioner(self.directory_name)
+        releaser = Semversioner(path=self.directory_name)
         self.assertEqual(releaser.generate_changelog(), "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
-        self.assertEqual(releaser.get_version(), "0.0.0")
+        self.assertEqual(releaser.get_last_version(), "0.0.0")
         self.assertEqual(releaser.get_status(), {
             'version': '0.0.0',
             'next_version': None,
@@ -45,6 +45,51 @@ class CoreTestCase(unittest.TestCase):
         })
         with self.assertRaises(SystemExit):
             releaser.release()
+
+    def test_release(self):
+
+        releaser = Semversioner(path=self.directory_name)
+
+        releaser.add_change("minor", "My description")
+        releaser.add_change("major", "My description")
+        self.assertEqual(releaser.get_status(), {
+            'version': '0.0.0',
+            'next_version': '1.0.0',
+            'unreleased_changes': [
+                {'type': 'major', 'description': 'My description'},
+                {'type': 'minor', 'description': 'My description'}
+            ],
+        })
+        releaser.release()
+        self.assertEqual(releaser.get_status(), {
+            'version': '1.0.0',
+            'next_version': None,
+            'unreleased_changes': [],
+        })
+        with self.assertRaises(SystemExit):
+            releaser.release()
+
+    def test_release_stress(self):
+
+        releaser = Semversioner(path=self.directory_name)
+
+        expected = []
+        for i in range(100):
+            releaser.add_change("major", f"My description {i}")
+            expected.append({'type': 'major', 'description': f"My description {i}"})
+
+        expected = sorted(expected, key=lambda k: k['type'] + k['description'])
+        self.assertEqual(releaser.get_status(), {
+            'version': '0.0.0',
+            'next_version': '1.0.0',
+            'unreleased_changes': expected,
+        })
+        releaser.release()
+        self.assertEqual(releaser.get_status(), {
+            'version': '1.0.0',
+            'next_version': None,
+            'unreleased_changes': [],
+        })
 
     def test_is_deprecated(self):
         releaser = Semversioner(self.directory_name)

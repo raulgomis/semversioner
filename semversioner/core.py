@@ -88,7 +88,7 @@ class Semversioner:
             click.secho("Error: No changes to release. Skipping release process.", fg='red')
             sys.exit(-1)
 
-        current_version_number = self.get_version()
+        current_version_number = self.get_last_version()
         next_version_number = self.get_next_version(changes, current_version_number)
 
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
@@ -100,12 +100,12 @@ class Semversioner:
             'new_version': next_version_number
         }
 
-    def get_version(self):
+    def get_last_version(self):
         """ 
         Gets the current version.
 
         """
-        return self.fs.get_version() or INITIAL_VERSION
+        return self.fs.get_last_version() or INITIAL_VERSION
 
     def get_next_version(self, changes, current_version_number):
         if len(changes) == 0:
@@ -118,7 +118,7 @@ class Semversioner:
         """
         Displays the status of the working directory.
         """
-        version = self.get_version()
+        version = self.get_last_version()
         changes = self.fs.list_changesets()
         next_version = self.get_next_version(changes, version)
 

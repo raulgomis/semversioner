@@ -2,6 +2,7 @@ import os
 import json
 import click
 import datetime
+import random
 from distutils.version import StrictVersion
 
 from abc import abstractmethod, ABCMeta
@@ -34,7 +35,7 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_version(self):
+    def get_last_version(self):
         pass
 
 
@@ -89,9 +90,10 @@ class SemversionerFileSystemStorage(SemversionerStorage):
 
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
-            filename = '{type_name}-{datetime}.json'.format(
+            filename = '{type_name}-{datetime}-{number}.json'.format(
                 type_name=parsed_values['type'],
-                datetime="{:%Y%m%d%H%M%S}".format(datetime.datetime.utcnow()))
+                datetime="{:%Y%m%d%H%M%S}".format(datetime.datetime.utcnow()),
+                number='{:03}'.format(random.randint(0, 999)))
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:
             f.write(json.dumps(parsed_values, indent=2) + "\n")
@@ -111,10 +113,13 @@ class SemversionerFileSystemStorage(SemversionerStorage):
     def list_changesets(self):
         changes = []
         next_release_dir = self.next_release_path
+        if not os.path.isdir(next_release_dir):
+            return changes
         for filename in os.listdir(next_release_dir):
             full_path = os.path.join(next_release_dir, filename)
             with open(full_path) as f:
                 changes.append(json.load(f))
+        changes = sorted(changes, key=lambda k: k['type'] + k['description'])
         return changes
 
     def create_version(self, version, changes):
@@ -125,24 +130,24 @@ class SemversionerFileSystemStorage(SemversionerStorage):
 
     def list_versions(self):
         releases = []
-        for release_identifier in self._sorted_releases():
+        for release_identifier in self._list_release_numbers():
             with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
                 data = json.load(f)
             data = sorted(data, key=lambda k: k['type'] + k['description'])
             releases.append({'version': release_identifier, 'changes': data})
         return releases
 
-    def get_version(self):
+    def get_last_version(self):
         """ 
-        Gets the current version.
+        Gets the current version number. None if there is nothing released yet.
 
         """
-        releases = self._sorted_releases()
+        releases = self._list_release_numbers()
         if len(releases) > 0:
             return releases[0]
         return None
 
-    def _sorted_releases(self):
+    def _list_release_numbers(self):
         files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
         releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
         return releases
