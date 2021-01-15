@@ -2,7 +2,6 @@ import os
 import json
 import click
 import datetime
-import random
 from distutils.version import StrictVersion
 
 from abc import abstractmethod, ABCMeta
@@ -90,10 +89,9 @@ class SemversionerFileSystemStorage(SemversionerStorage):
 
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
-            filename = '{type_name}-{datetime}-{number}.json'.format(
+            filename = '{type_name}-{datetime}.json'.format(
                 type_name=parsed_values['type'],
-                datetime="{:%Y%m%d%H%M%S}".format(datetime.datetime.utcnow()),
-                number='{:03}'.format(random.randint(0, 999)))
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.datetime.utcnow()))
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:
             f.write(json.dumps(parsed_values, indent=2) + "\n")
