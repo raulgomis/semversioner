@@ -63,6 +63,7 @@ class AddChangeCommandTest(CommandTest):
         self.assertListEqual(expected, data)
         self.assertRegex(result.output, f"Successfully created file {self.next_release_dirname}.*\\.json")
 
+
 class ReleaseCommandTest(CommandTest):
 
     def test_write_new_change(self):
