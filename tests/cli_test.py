@@ -63,6 +63,19 @@ class AddChangeCommandTest(CommandTest):
         self.assertListEqual(expected, data)
         self.assertRegex(result.output, f"Successfully created file {self.next_release_dirname}.*\\.json")
 
+class ReleaseCommandTest(CommandTest):
+
+    def test_write_new_change(self):
+        commands = [
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, f"Releasing version: 0.0.0 -> 1.0.0\nGenerated '{self.changes_dirname}/1.0.0.json' file.\nRemoving '{self.next_release_dirname}' directory.\nSuccessfully created new release: 1.0.0\n")
+
 
 class ChangelogCommandTest(CommandTest):
 
