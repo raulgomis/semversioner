@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Improved performance by supporting multiple changeset files per second"
+}

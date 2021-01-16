@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Internal code refactor to improve code readability and maintanability"
+}
