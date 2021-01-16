@@ -1,6 +1,12 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 0.12.0
+
+- minor: Improved performance by supporting multiple changeset files per second
+- minor: Status command now sorts unreleased changes by type and description in order to display consistent results
+- patch: Internal code refactor to improve code readability and maintanability
+
 ## 0.11.0
 
 - minor: Add '--version' filter to the 'changelog' command to display the changelog only for a specific version
@@ -77,4 +83,3 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 ## 0.6.6
 
 - minor: Initial version
-

@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Status command now sorts unreleased changes by type and description in order to display consistent results",
+    "type": "minor"
+  },
+  {
+    "description": "Improved performance by supporting multiple changeset files per second",
+    "type": "minor"
+  },
+  {
+    "description": "Internal code refactor to improve code readability and maintanability",
+    "type": "patch"
+  }
+]

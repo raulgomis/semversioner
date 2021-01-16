@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Status command now sorts unreleased changes by type and description in order to display consistent results"
-}
