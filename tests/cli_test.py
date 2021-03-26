@@ -7,6 +7,7 @@ from click.testing import CliRunner
 from semversioner.cli import cli
 from semversioner import __version__
 from tests import fixtures
+import importlib.resources
 
 
 def command_processor(commands, path):
@@ -18,6 +19,17 @@ def command_processor(commands, path):
         assert not result.exception
         assert result.exit_code == 0
     return result
+
+
+def get_file(filename):
+    path = None
+    with importlib.resources.path('tests.resources', filename) as p:
+        path = p
+    return path
+
+
+def read_file(filename):
+    return importlib.resources.read_text('tests.resources', filename)
 
 
 class CommandTest(unittest.TestCase):
@@ -169,6 +181,54 @@ class ChangelogCommandTest(CommandTest):
 
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
+
+    def test_generate_changelog_with_custom_template(self):  
+        commands = [
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["changelog"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, fixtures.CHANGELOG_4)
+
+        result = command_processor([
+            ["changelog", "--template", get_file("template_01.j2")]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, read_file("template_01_readme.md"))
+
+        result = command_processor([
+            ["changelog", "--template", get_file("template_02.j2")]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, read_file("template_02_readme.md"))
+
+        result = command_processor([
+            ["changelog"]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, fixtures.CHANGELOG_4)
+
+    def test_generate_changelog_with_custom_template_empty(self):  
+        commands = [
+            ["changelog", "--template", get_file("template_01.j2")]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, "# Changelog\n")
+
+    def test_generate_changelog_with_custom_not_existent(self):  
+        runner = CliRunner()
+        result = runner.invoke(cli=cli, args=["changelog", "--template", "non-existent-file.j2"])
+        assert result.exit_code == 2
+        assert "Error: Invalid value for '--template': Could not open file: non-existent-file.j2: No such file or directory" in result.output
 
 
 class CurrentVersionCommandTest(CommandTest):

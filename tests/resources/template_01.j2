@@ -1,0 +1,9 @@
+# Changelog
+{% for release in releases %}
+
+## {{ release.version }}
+
+{% for change in release.changes %}
+- {{ change.type }}: {{ change.description }}
+{% endfor %}
+{% endfor %}
