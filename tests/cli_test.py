@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from semversioner.cli import cli
 from semversioner import __version__
 from tests import fixtures
-import importlib.resources
+from importlib_resources import files
 
 
 def command_processor(commands, path):
@@ -22,14 +22,11 @@ def command_processor(commands, path):
 
 
 def get_file(filename):
-    path = None
-    with importlib.resources.path('tests.resources', filename) as p:
-        path = p
-    return path
+    return files('tests.resources').joinpath(filename)
 
 
 def read_file(filename):
-    return importlib.resources.read_text('tests.resources', filename)
+    return files('tests.resources').joinpath(filename).read_text()
 
 
 class CommandTest(unittest.TestCase):
