@@ -37,7 +37,7 @@ ROOTDIR = os.getcwd()
 
 
 @click.group()
-@click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.")
+@click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.", type=click.Path(exists=True))
 @click.version_option(version=str(__version__.__version__))
 @click.pass_context
 def cli(ctx, path):
@@ -60,10 +60,14 @@ def cli_release(ctx):
 
 @cli.command('changelog', help="Print the changelog.")
 @click.option('--version', default=None, help="Filter the changelog by version.")
+@click.option('--template', default=None, help="Path to a custom changelog template.", type=click.File('r'))
 @click.pass_context
-def cli_changelog(ctx, version):
+def cli_changelog(ctx, version, template):
     releaser = ctx.obj['releaser']
-    changelog = releaser.generate_changelog(version=version)
+    if template:
+        changelog = releaser.generate_changelog(version=version, template=template.read())
+    else:
+        changelog = releaser.generate_changelog(version=version)
     click.echo(message=changelog, nl=False)
 
 

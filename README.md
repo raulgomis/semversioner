@@ -54,10 +54,31 @@ $ semversioner release
 
 ### Generating Changelog
 
-As a part of your CI/CD workflow, you will be able to generate the Changelog file with all changes.
+As a part of your CI/CD workflow, you will be able to generate the changelog file with all changes.
 
 ```shell
 $ semversioner changelog > CHANGELOG.md
+```
+
+You can customize the changelog by creating a template and passing it as parameter to the command. For example:
+
+```shell
+$ semversioner changelog --template .semversioner/config/template.j2
+```
+
+The template is using [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/), a templating language for Python. For example:
+
+```
+# Changelog
+{% for release in releases %}
+
+## {{ release.version }}
+
+{% for change in release.changes %}
+- {{ change.type }}: {{ change.description }}
+{% endfor %}
+{% endfor %}
+
 ```
 
 You can filter the changelog by only showing changes for a specific version:
@@ -73,7 +94,7 @@ $ semversioner changelog --version $(semversioner current-version)
 ```
 
 ## License
-Copyright (c) 2020 Raul Gomis.
+Copyright (c) 2021 Raul Gomis.
 MIT licensed, see [LICENSE](LICENSE) file.
 
 ---

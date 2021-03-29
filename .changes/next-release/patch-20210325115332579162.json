@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Fix security vulnerability with jinja2 CVE-2020-28493"
+}

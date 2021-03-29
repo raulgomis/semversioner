@@ -47,7 +47,7 @@ class Semversioner:
 
         return self.fs.create_changeset(change_type=change_type, description=description)
 
-    def generate_changelog(self, version=None):
+    def generate_changelog(self, version=None, template=DEFAULT_TEMPLATE):
         """ 
         Generates the changelog.
 
@@ -64,7 +64,7 @@ class Semversioner:
         if version is not None:
             releases = [x for x in releases if x['version'] == version]
 
-        return Template(DEFAULT_TEMPLATE, trim_blocks=True).render(releases=releases)
+        return Template(template, trim_blocks=True).render(releases=releases)
 
     def release(self):
         """ 

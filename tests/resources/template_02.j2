@@ -1,0 +1,10 @@
+# Changelog
+Note: version releases in the 0.x.y range may introduce breaking changes.
+{% for release in releases %}
+
+## {{ release.version }} (<DATE>)
+
+{% for change in release.changes %}
+- {{ change.type }}: {{ change.description }}
+{% endfor %}
+{% endfor %}
