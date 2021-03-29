@@ -1,0 +1,10 @@
+[
+  {
+    "description": "Fix security vulnerability with jinja2 CVE-2020-28493",
+    "type": "patch"
+  },
+  {
+    "description": "Add support for custom changelog template",
+    "type": "minor"
+  }
+]

@@ -1,6 +1,11 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 0.13.0
+
+- minor: Add support for custom changelog template
+- patch: Fix security vulnerability with jinja2 CVE-2020-28493
+
 ## 0.12.0
 
 - minor: Improved performance by supporting multiple changeset files per second
