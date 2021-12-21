@@ -15,12 +15,11 @@ DESCRIPTION = 'Manage properly semver in your repository'
 URL = 'https://github.com/raulgomis/semversioner'
 EMAIL = 'raulgomis@gmail.com'
 AUTHOR = 'Raul Gomis'
-REQUIRES_PYTHON = '>=3.1.0'
+REQUIRES_PYTHON = '>=3.7.0'
 VERSION = None
 REQUIRED = [
-    'click',
-    'jinja2',
-    'colorama'
+    'click>=8.0.0',
+    'jinja2>=3.0.0'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -96,14 +95,10 @@ setup(
 
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.1',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Operating System :: OS Independent',
     ],
 
