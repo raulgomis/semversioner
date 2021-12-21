@@ -1,17 +1,11 @@
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional
 
 import click
 from jinja2 import Template
 
 from semversioner.storage import SemversionerFileSystemStorage
-
-if TYPE_CHECKING:
-    from _typeshed import SupportsLessThan
-    T = TypeVar("T", bound=SupportsLessThan)
-else:
-    T = TypeVar("T")
 
 ROOTDIR = os.getcwd()
 INITIAL_VERSION = '0.0.0'

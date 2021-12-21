@@ -3,7 +3,7 @@ import json
 import os
 from abc import ABCMeta, abstractmethod
 from distutils.version import StrictVersion
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
 
@@ -150,12 +150,3 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
         releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
         return releases
-
-    def try_sort(iterable: Iterable[str]) -> Iterable[str]:
-        # Pulled from pandas.core.common since
-        # it was deprecated and removed in 1.1
-        listed = list(iterable)
-        try:
-            return sorted(listed)
-        except TypeError:
-            return listed

@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Bump wheel dependency to 0.37.0."
+}
