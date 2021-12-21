@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
 
 import click
 from jinja2 import Template
@@ -30,7 +30,7 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 class Semversioner:
 
-    def __init__(self, path: str=ROOTDIR):
+    def __init__(self, path: str = ROOTDIR):
         self.fs = SemversionerFileSystemStorage(path=path)
 
     def is_deprecated(self) -> bool:
@@ -56,7 +56,7 @@ class Semversioner:
 
         return self.fs.create_changeset(change_type=change_type, description=description)
 
-    def generate_changelog(self, version: Optional[str]=None, template: str=DEFAULT_TEMPLATE) -> str:
+    def generate_changelog(self, version: Optional[str] = None, template: str = DEFAULT_TEMPLATE) -> str:
         """ 
         Generates the changelog.
 
@@ -120,7 +120,7 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x['type'], changes)))[0] # type: ignore
+        release_type: str = sorted(list(map(lambda x: x['type'], changes)))[0]  # type: ignore
         next_version: str = self._get_next_version_from_type(current_version_number, release_type)
         return next_version
 

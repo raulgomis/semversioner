@@ -8,11 +8,11 @@ from typing import List
 
 from click.testing import CliRunner, Result
 from importlib_resources import files
-from importlib_resources.abc import Traversable
 
 from semversioner import __version__
 from semversioner.cli import cli
 from tests import fixtures
+
 
 def command_processor(commands: List[List[str]], path: str) -> Result:
     runner = CliRunner()
@@ -26,11 +26,11 @@ def command_processor(commands: List[List[str]], path: str) -> Result:
 
 
 def get_file(filename: str) -> Path: 
-    return files('tests.resources').joinpath(filename) # type: ignore
+    return files('tests.resources').joinpath(filename)  # type: ignore
 
 
 def read_file(filename: str) -> str:
-    return files('tests.resources').joinpath(filename).read_text() # type: ignore
+    return files('tests.resources').joinpath(filename).read_text()  # type: ignore
 
 
 class CommandTest(unittest.TestCase):

@@ -118,7 +118,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             full_path = os.path.join(next_release_dir, filename)
             with open(full_path) as f:
                 changes.append(json.load(f))
-        changes = sorted(changes, key=lambda k: k['type'] + k['description']) # type: ignore
+        changes = sorted(changes, key=lambda k: k['type'] + k['description'])  # type: ignore
         return changes
 
     def create_version(self, version: str, changes: List[Dict[str, Any]]) -> None:
@@ -132,7 +132,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         for release_identifier in self._list_release_numbers():
             with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
                 data = json.load(f)
-            data = sorted(data, key=lambda k: k['type'] + k['description']) # type: ignore
+            data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
             releases.append({'version': release_identifier, 'changes': data})
         return releases
 
