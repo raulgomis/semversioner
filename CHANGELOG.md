@@ -1,6 +1,20 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.0.0
+
+- major: Drop support for Python 3.6.
+- minor: Add type hinting.
+- minor: Bump click dependency to 8.0.3.
+- minor: Bump jinja2 dependency to 3.0.3.
+- patch: Add Python 3.10 testing in the CI/CD process.
+- patch: Bump importlib_resources dependency to 5.4.0.
+- patch: Bump pytest dependency to 6.2.5.
+- patch: Bump twine dependency to 3.7.1.
+- patch: Bump wheel dependency to 0.37.0.
+- patch: Remove unnecessary dependency: colorama.
+- patch: Rename semversioner directory to .semversioner.
+
 ## 0.13.0
 
 - minor: Add support for custom changelog template

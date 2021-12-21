@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Add Python 3.10 testing in the CI/CD process."
-}

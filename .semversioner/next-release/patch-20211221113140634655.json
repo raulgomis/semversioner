@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Bump importlib_resources dependency to 5.4.0."
-}

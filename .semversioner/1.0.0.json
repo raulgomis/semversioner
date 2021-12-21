@@ -1,0 +1,46 @@
+[
+  {
+    "description": "Drop support for Python 3.6.",
+    "type": "major"
+  },
+  {
+    "description": "Add type hinting.",
+    "type": "minor"
+  },
+  {
+    "description": "Bump click dependency to 8.0.3.",
+    "type": "minor"
+  },
+  {
+    "description": "Bump jinja2 dependency to 3.0.3.",
+    "type": "minor"
+  },
+  {
+    "description": "Add Python 3.10 testing in the CI/CD process.",
+    "type": "patch"
+  },
+  {
+    "description": "Bump importlib_resources dependency to 5.4.0.",
+    "type": "patch"
+  },
+  {
+    "description": "Bump pytest dependency to 6.2.5.",
+    "type": "patch"
+  },
+  {
+    "description": "Bump twine dependency to 3.7.1.",
+    "type": "patch"
+  },
+  {
+    "description": "Bump wheel dependency to 0.37.0.",
+    "type": "patch"
+  },
+  {
+    "description": "Remove unnecessary dependency: colorama.",
+    "type": "patch"
+  },
+  {
+    "description": "Rename semversioner directory to .semversioner.",
+    "type": "patch"
+  }
+]
