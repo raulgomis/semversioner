@@ -1,18 +1,22 @@
-import unittest
-import shutil
-import os
-import tempfile
 import json
-from click.testing import CliRunner
-from semversioner.cli import cli
-from semversioner import __version__
-from tests import fixtures
+import os
+import shutil
+import tempfile
+import unittest
+from pathlib import Path
+from typing import List
+
+from click.testing import CliRunner, Result
 from importlib_resources import files
+from importlib_resources.abc import Traversable
 
+from semversioner import __version__
+from semversioner.cli import cli
+from tests import fixtures
 
-def command_processor(commands, path):
+def command_processor(commands: List[List[str]], path: str) -> Result:
     runner = CliRunner()
-    result = None
+    result: Result
     for command in commands:
         command_with_path = ["--path", path] + command
         result = runner.invoke(cli, command_with_path)
@@ -21,33 +25,33 @@ def command_processor(commands, path):
     return result
 
 
-def get_file(filename):
-    return files('tests.resources').joinpath(filename)
+def get_file(filename: str) -> Path: 
+    return files('tests.resources').joinpath(filename) # type: ignore
 
 
-def read_file(filename):
-    return files('tests.resources').joinpath(filename).read_text()
+def read_file(filename: str) -> str:
+    return files('tests.resources').joinpath(filename).read_text() # type: ignore
 
 
 class CommandTest(unittest.TestCase):
-    directory_name = None
-    changes_dirname = None
-    next_release_dirname = None
+    directory_name: str
+    changes_dirname: str
+    next_release_dirname: str
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.directory_name = tempfile.mkdtemp()
         self.changes_dirname = os.path.join(self.directory_name, '.semversioner')
         self.next_release_dirname = os.path.join(self.changes_dirname, 'next-release')
         print("Created directory: " + self.directory_name)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         print("Removing directory: " + self.directory_name)
         shutil.rmtree(self.directory_name)
 
 
 class AddChangeCommandTest(CommandTest):
 
-    def test_write_new_change(self):
+    def test_write_new_change(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -75,7 +79,7 @@ class AddChangeCommandTest(CommandTest):
 
 class ReleaseCommandTest(CommandTest):
 
-    def test_write_new_change(self):
+    def test_write_new_change(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -89,7 +93,7 @@ class ReleaseCommandTest(CommandTest):
 
 class ChangelogCommandTest(CommandTest):
 
-    def test_generate_changelog_empty(self):
+    def test_generate_changelog_empty(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -99,7 +103,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
 
-    def test_generate_changelog_single_major(self):
+    def test_generate_changelog_single_major(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["release"],
@@ -115,7 +119,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_1)
 
-    def test_generate_changelog_single_patch(self):
+    def test_generate_changelog_single_patch(self) -> None:
         commands = [
             ["add-change", "--type", "patch", "--description", "This is my patch description"],
             ["release"],
@@ -125,7 +129,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_2)
 
-    def test_generate_changelog_multiple(self):
+    def test_generate_changelog_multiple(self) -> None:
         commands = [
             ["add-change", "--type", "patch", "--description", "This is my patch description"],
             ["release"],
@@ -148,7 +152,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_3)
 
-    def test_generate_changelog_multiple_new(self):  
+    def test_generate_changelog_multiple_new(self) -> None:  
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -171,7 +175,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_4_PARTIAL)
 
-    def test_generate_changelog_filtering_non_existing_version(self):
+    def test_generate_changelog_filtering_non_existing_version(self) -> None:
         commands = [
             ["changelog", "--version", "2.0.0"]
         ]
@@ -179,7 +183,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
 
-    def test_generate_changelog_with_custom_template(self):  
+    def test_generate_changelog_with_custom_template(self) -> None:  
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -196,13 +200,13 @@ class ChangelogCommandTest(CommandTest):
         self.assertEqual(result.output, fixtures.CHANGELOG_4)
 
         result = command_processor([
-            ["changelog", "--template", get_file("template_01.j2")]
+            ["changelog", "--template", str(get_file("template_01.j2"))]
         ], self.directory_name)
 
         self.assertEqual(result.output, read_file("template_01_readme.md"))
 
         result = command_processor([
-            ["changelog", "--template", get_file("template_02.j2")]
+            ["changelog", "--template", str(get_file("template_02.j2"))]
         ], self.directory_name)
 
         self.assertEqual(result.output, read_file("template_02_readme.md"))
@@ -213,24 +217,24 @@ class ChangelogCommandTest(CommandTest):
 
         self.assertEqual(result.output, fixtures.CHANGELOG_4)
 
-    def test_generate_changelog_with_custom_template_empty(self):  
+    def test_generate_changelog_with_custom_template_empty(self) -> None:  
         commands = [
-            ["changelog", "--template", get_file("template_01.j2")]
+            ["changelog", "--template", str(get_file("template_01.j2"))]
         ]
 
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\n")
 
-    def test_generate_changelog_with_custom_not_existent(self):  
+    def test_generate_changelog_with_custom_not_existent(self) -> None:  
         runner = CliRunner()
         result = runner.invoke(cli=cli, args=["changelog", "--template", "non-existent-file.j2"])
         assert result.exit_code == 2
-        assert "Error: Invalid value for '--template': Could not open file: non-existent-file.j2: No such file or directory" in result.output
+        assert "Error: Invalid value for '--template': 'non-existent-file.j2': No such file or directory" in result.output
 
 
 class CurrentVersionCommandTest(CommandTest):
 
-    def test_cli_execution_current_version(self):
+    def test_cli_execution_current_version(self) -> None:
         commands = [
             ["current-version"]
         ]
@@ -238,7 +242,7 @@ class CurrentVersionCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertIn("0.0.0", result.output)
 
-    def test_cli_execution_add_change(self):
+    def test_cli_execution_add_change(self) -> None:
         commands = [
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
             ["release"],
@@ -251,7 +255,7 @@ class CurrentVersionCommandTest(CommandTest):
 
 class StatusCommandTest(CommandTest):
 
-    def test_status_command_with_no_changes(self):
+    def test_status_command_with_no_changes(self) -> None:
         commands = [
             ["status"],
         ]
@@ -259,7 +263,7 @@ class StatusCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_NO_CHANGES, result.output)
 
-    def test_status_command_with_released_changes(self):
+    def test_status_command_with_released_changes(self) -> None:
         commands = [
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
             ["release"],
@@ -269,7 +273,7 @@ class StatusCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_RELEASED_CHANGES, result.output)
 
-    def test_status_command_with_unreleased_changes(self):
+    def test_status_command_with_unreleased_changes(self) -> None:
         commands = [
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
             ["status"],
@@ -280,7 +284,7 @@ class StatusCommandTest(CommandTest):
 
 
 class CliVersionCommandTest(CommandTest):
-    def test_cli_version(self):
+    def test_cli_version(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli=cli, args=['--version'])
 
@@ -290,11 +294,11 @@ class CliVersionCommandTest(CommandTest):
 
 
 class ExistingDataTestCase(unittest.TestCase):
-    directory_name = None
-    changes_dirname = None
-    next_release_dirname = None
+    directory_name: str
+    changes_dirname: str
+    next_release_dirname: str
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.directory_name = tempfile.mkdtemp()
         self.changes_dirname = os.path.join(self.directory_name, '.changes')
         self.next_release_dirname = os.path.join(self.changes_dirname, 'next-release')
@@ -305,11 +309,11 @@ class ExistingDataTestCase(unittest.TestCase):
             output.write(fixtures.VERSION_0_2_0)
         print("Created directory: " + self.directory_name)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         print("Removing directory: " + self.directory_name)
         shutil.rmtree(self.directory_name)
 
-    def test_generate_changelog_single_patch(self):
+    def test_generate_changelog_single_patch(self) -> None:
         commands = [
             ["changelog"]
         ]
@@ -317,7 +321,7 @@ class ExistingDataTestCase(unittest.TestCase):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_5)
 
-    def test_cli_execution_current_version(self):
+    def test_cli_execution_current_version(self) -> None:
         commands = [
             ["current-version"]
         ]
@@ -325,7 +329,7 @@ class ExistingDataTestCase(unittest.TestCase):
         result = command_processor(commands, self.directory_name)
         self.assertIn("0.2.0", result.output)
 
-    def test_generate_changelog_add_new_patch(self):
+    def test_generate_changelog_add_new_patch(self) -> None:
         commands = [
             ["add-change", "--type", "patch", "--description", "This is my patch description"],
             ["release"],

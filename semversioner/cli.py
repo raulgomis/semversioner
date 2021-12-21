@@ -29,7 +29,10 @@ Usage
 """
 
 import os
+from typing import Optional, TextIO
+
 import click
+
 from semversioner import __version__
 from semversioner.core import Semversioner
 
@@ -40,7 +43,7 @@ ROOTDIR = os.getcwd()
 @click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.", type=click.Path(exists=True))
 @click.version_option(version=str(__version__.__version__))
 @click.pass_context
-def cli(ctx, path):
+def cli(ctx: click.Context, path: str) -> None:
     ctx.obj = {
         'releaser': Semversioner(path=path)
     }
@@ -48,7 +51,7 @@ def cli(ctx, path):
 
 @cli.command('release', help="Release a new version.")
 @click.pass_context
-def cli_release(ctx):
+def cli_release(ctx: click.Context) -> None:
     releaser = ctx.obj['releaser']
     if releaser.is_deprecated():
         click.secho("WARN", bg='yellow', fg='black', nl=False)
@@ -62,7 +65,7 @@ def cli_release(ctx):
 @click.option('--version', default=None, help="Filter the changelog by version.")
 @click.option('--template', default=None, help="Path to a custom changelog template.", type=click.File('r'))
 @click.pass_context
-def cli_changelog(ctx, version, template):
+def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) -> None:
     releaser = ctx.obj['releaser']
     if template:
         changelog = releaser.generate_changelog(version=version, template=template.read())
@@ -75,7 +78,7 @@ def cli_changelog(ctx, version, template):
 @click.pass_context
 @click.option('--type', '-t', type=click.Choice(['major', 'minor', 'patch']), required=True)
 @click.option('--description', '-d', required=True)
-def cli_add_change(ctx, type, description):
+def cli_add_change(ctx: click.Context, type: str, description: str) -> None:
     releaser = ctx.obj['releaser']
     result = releaser.add_change(type, description)
     click.echo(message="Successfully created file " + result['path'])
@@ -83,7 +86,7 @@ def cli_add_change(ctx, type, description):
 
 @cli.command('current-version', help="Show the current version.")
 @click.pass_context
-def cli_current_version(ctx):
+def cli_current_version(ctx: click.Context) -> None:
     releaser = ctx.obj['releaser']
     version = releaser.get_last_version()
     click.echo(message=version)
@@ -91,7 +94,7 @@ def cli_current_version(ctx):
 
 @cli.command('status', help="Show the status of the working directory.")
 @click.pass_context
-def status(ctx):
+def status(ctx: click.Context) -> None:
     releaser = ctx.obj['releaser']
     version = releaser.get_status()['version']
     next_version = releaser.get_status()['next_version']
@@ -107,7 +110,7 @@ def status(ctx):
         click.echo(message="No changes to release (use \"semversioner add-change\")")
 
 
-def main():
+def main() -> None:
     # pylint: disable=no-value-for-parameter
     cli()
 
