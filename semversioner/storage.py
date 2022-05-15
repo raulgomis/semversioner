@@ -135,12 +135,12 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         click.echo("Generated '" + release_json_filename + "' file.")
 
     def list_versions(self) -> List[Release]:
-        releases: List[Dict[str, Any]] = []
+        releases: List[Release] = []
         for release_identifier in self._list_release_numbers():
             with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
                 data = json.load(f)
-            data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
-            releases.append(Release(version=release_identifier, changes=data))
+                data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
+                releases.append(Release(version=release_identifier, changes=data))
         return releases
 
     def get_last_version(self) -> Optional[str]:
