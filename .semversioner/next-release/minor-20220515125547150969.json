@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Use models for better encapsulation and code refactoring."
+}
