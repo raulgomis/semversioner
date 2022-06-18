@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Expose models to use semversioner as a library."
+}
