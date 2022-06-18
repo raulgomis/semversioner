@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List
+from typing import List, Optional
 
 
 class ReleaseType(Enum):
@@ -36,5 +36,5 @@ class ReleaseStatus:
     Represents the status of the release in a particular point of time.
     """
     version: str
-    next_version: str
-    unreleased_changes: List[Dict[str, Any]]
+    next_version: Optional[str]
+    unreleased_changes: List[Changeset]

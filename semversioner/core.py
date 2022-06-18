@@ -112,7 +112,7 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]  # type: ignore
+        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]
         next_version: str = self._get_next_version_from_type(current_version_number, release_type)
         return next_version
 

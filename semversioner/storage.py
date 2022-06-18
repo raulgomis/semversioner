@@ -4,7 +4,7 @@ import json
 import os
 from abc import ABCMeta, abstractmethod
 from distutils.version import StrictVersion
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import click
 
@@ -26,11 +26,11 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def list_changesets(self) -> List[Dict[str, Any]]:
+    def list_changesets(self) -> List[Changeset]:
         pass
 
     @abstractmethod
-    def create_version(self, version: str, changes: List[Dict[str, Any]]) -> None:
+    def create_version(self, version: str, changes: List[Changeset]) -> None:
         pass
 
     @abstractmethod
@@ -43,7 +43,7 @@ class SemversionerStorage(metaclass=ABCMeta):
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
-    def default(self, o):
+    def default(self, o):  # type: ignore
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         return super().default(o)
@@ -125,7 +125,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             with open(full_path) as f:
                 dict = json.load(f)
                 changes.append(Changeset(**dict))
-        changes = sorted(changes, key=lambda k: k.type + k.description)  # type: ignore
+        changes = sorted(changes, key=lambda k: k.type + k.description)
         return changes
 
     def create_version(self, version: str, changes: List[Changeset]) -> None:
