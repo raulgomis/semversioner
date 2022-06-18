@@ -35,6 +35,7 @@ import click
 
 from semversioner import __version__
 from semversioner.core import Semversioner
+from semversioner.models import Release, ReleaseStatus
 
 ROOTDIR = os.getcwd()
 
@@ -52,13 +53,13 @@ def cli(ctx: click.Context, path: str) -> None:
 @cli.command('release', help="Release a new version.")
 @click.pass_context
 def cli_release(ctx: click.Context) -> None:
-    releaser = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj['releaser']
     if releaser.is_deprecated():
         click.secho("WARN", bg='yellow', fg='black', nl=False)
         click.secho(" deprecated ", fg='magenta', nl=False)
         click.echo("Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message.")
-    result = releaser.release()
-    click.echo(message="Successfully created new release: " + result['new_version'])
+    result: Release = releaser.release()
+    click.echo(message="Successfully created new release: " + result.version)
 
 
 @cli.command('changelog', help="Print the changelog.")
@@ -66,7 +67,7 @@ def cli_release(ctx: click.Context) -> None:
 @click.option('--template', default=None, help="Path to a custom changelog template.", type=click.File('r'))
 @click.pass_context
 def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) -> None:
-    releaser = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj['releaser']
     if template:
         changelog = releaser.generate_changelog(version=version, template=template.read())
     else:
@@ -79,15 +80,15 @@ def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) 
 @click.option('--type', '-t', type=click.Choice(['major', 'minor', 'patch']), required=True)
 @click.option('--description', '-d', required=True)
 def cli_add_change(ctx: click.Context, type: str, description: str) -> None:
-    releaser = ctx.obj['releaser']
-    result = releaser.add_change(type, description)
-    click.echo(message="Successfully created file " + result['path'])
+    releaser: Semversioner = ctx.obj['releaser']
+    path: str = releaser.add_change(type, description)
+    click.echo(message="Successfully created file " + path)
 
 
 @cli.command('current-version', help="Show the current version.")
 @click.pass_context
 def cli_current_version(ctx: click.Context) -> None:
-    releaser = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj['releaser']
     version = releaser.get_last_version()
     click.echo(message=version)
 
@@ -95,16 +96,14 @@ def cli_current_version(ctx: click.Context) -> None:
 @cli.command('status', help="Show the status of the working directory.")
 @click.pass_context
 def status(ctx: click.Context) -> None:
-    releaser = ctx.obj['releaser']
-    version = releaser.get_status()['version']
-    next_version = releaser.get_status()['next_version']
-    unreleased_changes = releaser.get_status()['unreleased_changes']
-    click.echo(message=f"Version: {version}")
-    if len(unreleased_changes) > 0:
-        click.echo(message=f"Next version: {next_version}")
+    releaser: Semversioner = ctx.obj['releaser']
+    status: ReleaseStatus = releaser.get_status()
+    click.echo(message=f"Version: {status.version}")
+    if len(status.unreleased_changes) > 0:
+        click.echo(message=f"Next version: {status.next_version}")
         click.echo(message="Unreleased changes:")
-        for change in unreleased_changes:
-            click.secho(message=f"\t{change['type']}:\t{change['description']}", fg="red")
+        for change in status.unreleased_changes:
+            click.secho(message=f"\t{change.type}:\t{change.description}", fg="red")
         click.echo(message="(use \"semversioner release\" to release the next version)")
     else:
         click.echo(message="No changes to release (use \"semversioner add-change\")")

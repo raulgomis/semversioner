@@ -1,9 +1,10 @@
 import os
 import sys
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import click
 from jinja2 import Template
+from semversioner.models import Changeset, Release, ReleaseStatus, ReleaseType
 
 from semversioner.storage import SemversionerFileSystemStorage
 
@@ -30,7 +31,7 @@ class Semversioner:
     def is_deprecated(self) -> bool:
         return self.fs.is_deprecated()
 
-    def add_change(self, change_type: str, description: str) -> Dict[str, Any]:
+    def add_change(self, change_type: str, description: str) -> str:
         """ 
         Create a new changeset file.
 
@@ -62,14 +63,14 @@ class Semversioner:
         str
             Changelog string.
         """
-        releases = self.fs.list_versions()
+        releases: List[Release] = self.fs.list_versions()
 
         if version is not None:
-            releases = [x for x in releases if x['version'] == version]
+            releases = [x for x in releases if x.version == version]
 
         return Template(template, trim_blocks=True).render(releases=releases)
 
-    def release(self) -> Dict[str, Any]:
+    def release(self) -> Release:
         """ 
         Performs the release.
 
@@ -85,7 +86,7 @@ class Semversioner:
         new_version : str
             New version.
         """
-        changes = self.fs.list_changesets()
+        changes: List[Changeset] = self.fs.list_changesets()
 
         current_version_number = self.get_last_version()
         next_version_number = self.get_next_version(changes, current_version_number)
@@ -98,10 +99,7 @@ class Semversioner:
         self.fs.create_version(version=next_version_number, changes=changes)
         self.fs.remove_all_changesets()
 
-        return {
-            'previous_version': current_version_number,
-            'new_version': next_version_number
-        }
+        return Release(version=next_version_number, changes=changes)
 
     def get_last_version(self) -> str:
         """ 
@@ -110,15 +108,15 @@ class Semversioner:
         """
         return self.fs.get_last_version() or INITIAL_VERSION
 
-    def get_next_version(self, changes: List[Dict[str, Any]], current_version_number: str) -> Optional[str]:
+    def get_next_version(self, changes: List[Changeset], current_version_number: str) -> Optional[str]:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x['type'], changes)))[0]  # type: ignore
+        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]
         next_version: str = self._get_next_version_from_type(current_version_number, release_type)
         return next_version
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> ReleaseStatus:
         """
         Displays the status of the working directory.
         """
@@ -126,11 +124,7 @@ class Semversioner:
         changes = self.fs.list_changesets()
         next_version = self.get_next_version(changes, version)
 
-        return {
-            'version': version,
-            'next_version': next_version,
-            'unreleased_changes': changes,
-        }
+        return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 
     def _get_next_version_from_type(self, current_version: str, release_type: str) -> str:
         """ 
@@ -138,12 +132,12 @@ class Semversioner:
         """
         # Convert to a list of ints: [1, 0, 0].
         version_parts = list(int(i) for i in current_version.split('.'))
-        if release_type == 'patch':
+        if release_type == ReleaseType.PATCH.value:
             version_parts[2] += 1
-        elif release_type == 'minor':
+        elif release_type == ReleaseType.MINOR.value:
             version_parts[1] += 1
             version_parts[2] = 0
-        elif release_type == 'major':
+        elif release_type == ReleaseType.MAJOR.value:
             version_parts[0] += 1
             version_parts[1] = 0
             version_parts[2] = 0

@@ -1,11 +1,14 @@
+import dataclasses
 import datetime
 import json
 import os
 from abc import ABCMeta, abstractmethod
 from distutils.version import StrictVersion
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import click
+
+from semversioner.models import Changeset, Release
 
 
 class SemversionerStorage(metaclass=ABCMeta):
@@ -15,7 +18,7 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def create_changeset(self, change_type: str, description: str) -> Dict[str, str]:
+    def create_changeset(self, change_type: str, description: str) -> str:
         pass
 
     @abstractmethod
@@ -23,20 +26,27 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def list_changesets(self) -> List[Dict[str, Any]]:
+    def list_changesets(self) -> List[Changeset]:
         pass
 
     @abstractmethod
-    def create_version(self, version: str, changes: List[Dict[str, Any]]) -> None:
+    def create_version(self, version: str, changes: List[Changeset]) -> None:
         pass
 
     @abstractmethod
-    def list_versions(self) -> List[Dict[str, Any]]:
+    def list_versions(self) -> List[Release]:
         pass
 
     @abstractmethod
     def get_last_version(self) -> Optional[str]:
         pass
+
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):  # type: ignore
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
 
 
 class SemversionerFileSystemStorage(SemversionerStorage):
@@ -65,7 +75,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
     def is_deprecated(self) -> bool:
         return self.deprecated
 
-    def create_changeset(self, change_type: str, description: str) -> Dict[str, Any]:
+    def create_changeset(self, change_type: str, description: str) -> str:
         """ 
         Create a new changeset file.
 
@@ -83,23 +93,19 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        parsed_values = {
-            'type': change_type,
-            'description': description,
-        }
+        change = Changeset(type=change_type, description=description)
 
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
             filename = '{type_name}-{datetime}.json'.format(
-                type_name=parsed_values['type'],
-                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.datetime.utcnow()))
+                type_name=change.type,
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.datetime.utcnow())
+            )
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:
-            f.write(json.dumps(parsed_values, indent=2) + "\n")
+            f.write(json.dumps(change, cls=EnhancedJSONEncoder, indent=2) + "\n")
 
-        return { 
-            'path': os.path.join(self.next_release_path, filename)
-        }
+        return os.path.join(self.next_release_path, filename)
 
     def remove_all_changesets(self) -> None:
         click.echo("Removing '" + self.next_release_path + "' directory.")
@@ -109,31 +115,32 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             os.remove(full_path)
         os.rmdir(self.next_release_path)
 
-    def list_changesets(self) -> List[Dict[str, Any]]:
-        changes: List[Dict[str, Any]] = []
+    def list_changesets(self) -> List[Changeset]:
+        changes: List[Changeset] = []
         next_release_dir = self.next_release_path
         if not os.path.isdir(next_release_dir):
             return changes
         for filename in os.listdir(next_release_dir):
             full_path = os.path.join(next_release_dir, filename)
             with open(full_path) as f:
-                changes.append(json.load(f))
-        changes = sorted(changes, key=lambda k: k['type'] + k['description'])  # type: ignore
+                dict = json.load(f)
+                changes.append(Changeset(**dict))
+        changes = sorted(changes, key=lambda k: k.type + k.description)
         return changes
 
-    def create_version(self, version: str, changes: List[Dict[str, Any]]) -> None:
+    def create_version(self, version: str, changes: List[Changeset]) -> None:
         release_json_filename: str = os.path.join(self.semversioner_path, '%s.json' % version)
         with open(release_json_filename, 'w') as f:
-            f.write(json.dumps(changes, indent=2, sort_keys=True))
+            f.write(json.dumps(changes, cls=EnhancedJSONEncoder, indent=2, sort_keys=True))
         click.echo("Generated '" + release_json_filename + "' file.")
 
-    def list_versions(self) -> List[Dict[str, Any]]:
-        releases: List[Dict[str, Any]] = []
+    def list_versions(self) -> List[Release]:
+        releases: List[Release] = []
         for release_identifier in self._list_release_numbers():
             with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
                 data = json.load(f)
-            data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
-            releases.append({'version': release_identifier, 'changes': data})
+                data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
+                releases.append(Release(version=release_identifier, changes=data))
         return releases
 
     def get_last_version(self) -> Optional[str]:

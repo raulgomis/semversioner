@@ -77,7 +77,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'semversioner = semversioner:main'
+            'semversioner = semversioner.cli:main'
         ]
     },
 
