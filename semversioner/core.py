@@ -5,6 +5,7 @@ from typing import List, Optional
 import click
 from jinja2 import Template
 from semversioner.models import Changeset, Release, ReleaseStatus, ReleaseType
+from packaging.version import Version
 
 from semversioner.storage import SemversionerFileSystemStorage
 
@@ -112,6 +113,10 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
+        # is_pre_release = False
+        # if any(change.pre is not None for change in changes):
+        #     is_pre_release = True
+
         release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]  # type: ignore
         next_version: str = self._get_next_version_from_type(current_version_number, release_type)
         return next_version
@@ -126,19 +131,56 @@ class Semversioner:
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 
-    def _get_next_version_from_type(self, current_version: str, release_type: str) -> str:
+    def _get_next_version_from_type(self, current_version: str, release_type: str, prerelease_type: str = None) -> str:
         """ 
         Returns a string like '1.0.0'.
+
+        '1.0.0' + 'major' = '2.0.0'
+        '1.0.0' + 'minor' = '1.1.0'
+        '1.0.0' + 'patch' = '1.0.1'
+        '1.0.0' + 'major' + 'alpha' = '2.0.0-alpha.1'
+        '1.0.0' + 'minor' + 'alpha' = '1.1.0-alpha.1'
+        '2.0.0-alpha.1' + 'major' + 'alpha' = '2.0.0-alpha.2'
+        '2.0.0-alpha.1' + 'major' = '2.0.0'
+        '2.0.0-alpha.1' + 'minor' = '2.0.0'
+        '2.0.0-alpha.1' + 'patch' = '2.0.0'
         """
+
+        ver = Version(current_version)
+        version_parts = [ver.major, ver.minor, ver.micro]
+
+        if ver.is_prerelease:
+            next_major = next_minor = False
+            if ver.micro == 0 and ver.minor == 0:
+                next_major = True
+            elif ver.micro == 0 and ver.minor != 0:
+                next_minor = True
+
+            if prerelease_type is None:
+                if next_major:
+                    version_parts = [ver.major, ver.minor, ver.micro] 
+                elif next_minor:
+                    if release_type == ReleaseType.PATCH.value or release_type == ReleaseType.MINOR.value:
+                        version_parts = [ver.major, ver.minor, ver.micro] 
+                    elif release_type == ReleaseType.MAJOR.value:
+                        version_parts = [ver.major + 1, 0, 0]
+                else:
+                    if release_type == ReleaseType.PATCH.value:
+                        version_parts = [ver.major, ver.minor, ver.micro] 
+                    elif release_type == ReleaseType.MINOR.value:
+                        version_parts = [ver.major, ver.minor + 1, 0]
+                    elif release_type == ReleaseType.MAJOR.value:
+                        version_parts = [ver.major + 1, 0, 0]
+            else:
+                print("Hello")
+
         # Convert to a list of ints: [1, 0, 0].
-        version_parts = list(int(i) for i in current_version.split('.'))
-        if release_type == ReleaseType.PATCH.value:
-            version_parts[2] += 1
-        elif release_type == ReleaseType.MINOR.value:
-            version_parts[1] += 1
-            version_parts[2] = 0
-        elif release_type == ReleaseType.MAJOR.value:
-            version_parts[0] += 1
-            version_parts[1] = 0
-            version_parts[2] = 0
+        else:
+            if release_type == ReleaseType.PATCH.value:
+                version_parts = [ver.major, ver.minor, ver.micro + 1]
+            elif release_type == ReleaseType.MINOR.value:
+                version_parts = [ver.major, ver.minor + 1, 0]
+            elif release_type == ReleaseType.MAJOR.value:
+                version_parts = [ver.major + 1, 0, 0]
+
         return '.'.join(str(i) for i in version_parts)

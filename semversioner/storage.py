@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 from abc import ABCMeta, abstractmethod
-from distutils.version import StrictVersion
+from packaging.version import parse
 from typing import Any, Dict, List, Optional
 
 import click
@@ -154,6 +154,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return None
 
     def _list_release_numbers(self) -> List[str]:
-        files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
-        releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
+        files: List[str] = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
+        versions: List[str] = list(map(lambda x: x[:-len('.json')], files))
+        releases = sorted(versions, key=parse, reverse=True)
         return releases

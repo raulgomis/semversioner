@@ -12,6 +12,15 @@ class ReleaseType(Enum):
     PATCH = 'patch'
 
 
+class PreReleaseType(Enum):
+    """
+    Represents the type of prerelease.
+    """
+    ALPHA = 'alpha'
+    BETA = 'beta'
+    RC = 'rc'
+
+
 @dataclass(frozen=True)
 class Changeset:
     """

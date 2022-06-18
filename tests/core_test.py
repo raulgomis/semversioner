@@ -35,6 +35,22 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "minor"), "9.10.0")
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major"), "10.0.0")
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "patch"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "minor"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "major"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "patch"), "2.1.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "minor"), "2.1.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "major"), "3.0.0")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "patch"), "2.1.1")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "minor"), "2.2.0")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "major"), "3.0.0")  # weird case (should we fail?)
+        
+        # '1.0.0' + 'major' + 'alpha' = '2.0.0-alpha.1'
+        # '1.0.0' + 'minor' + 'alpha' = '1.1.0-alpha.1'
+        # '2.0.0-alpha.1' + 'major' + 'alpha' = '2.0.0-alpha.2'
+        # '2.0.0-alpha.1' + 'major' = '2.0.0'
+        # '2.0.0-alpha.1' + 'minor' = '2.0.0'
+        # '2.0.0-alpha.1' + 'patch' = '2.0.0'
 
     def test_commands_with_no_changesets(self) -> None:
         releaser = Semversioner(path=self.directory_name)
