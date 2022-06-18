@@ -1,0 +1,10 @@
+[
+  {
+    "description": "Expose models to use semversioner as a library.",
+    "type": "minor"
+  },
+  {
+    "description": "Use models for better encapsulation and code refactoring.",
+    "type": "minor"
+  }
+]
