@@ -1,12 +1,13 @@
 import os
 import sys
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 import click
 from jinja2 import Template
-from semversioner.models import Changeset, Release, ReleaseStatus, ReleaseType
+from semversioner.models import Changeset, Release, ReleaseStatus
 
 from semversioner.storage import SemversionerFileSystemStorage
+from semversioner.version import SemVersion
 
 ROOTDIR = os.getcwd()
 INITIAL_VERSION = '0.0.0'
@@ -31,7 +32,7 @@ class Semversioner:
     def is_deprecated(self) -> bool:
         return self.fs.is_deprecated()
 
-    def add_change(self, change_type: str, description: str) -> str:
+    def add_change(self, change_type: str, description: str, pre: Optional[str] = None) -> str:
         """ 
         Create a new changeset file.
 
@@ -49,7 +50,7 @@ class Semversioner:
             Absolute path of the file generated.
         """
 
-        return self.fs.create_changeset(change_type=change_type, description=description)
+        return self.fs.create_changeset(change_type=change_type, description=description, pre=pre)
 
     def generate_changelog(self, version: Optional[str] = None, template: str = DEFAULT_TEMPLATE) -> str:
         """ 
@@ -112,8 +113,14 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]
-        next_version: str = self._get_next_version_from_type(current_version_number, release_type)
+        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]  # type: ignore
+
+        prereleases = [x.pre for x in changes if x.pre is not None]
+        prerelease_type = None
+        if len(prereleases) > 0:
+            prerelease_type = sorted(list(prereleases), reverse=True)[0]
+
+        next_version: str = self._get_next_version_from_type(current_version_number, release_type, prerelease_type)
         return next_version
 
     def get_status(self) -> ReleaseStatus:
@@ -126,19 +133,12 @@ class Semversioner:
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 
-    def _get_next_version_from_type(self, current_version: str, release_type: str) -> str:
-        """ 
-        Returns a string like '1.0.0'.
-        """
-        # Convert to a list of ints: [1, 0, 0].
-        version_parts = list(int(i) for i in current_version.split('.'))
-        if release_type == ReleaseType.PATCH.value:
-            version_parts[2] += 1
-        elif release_type == ReleaseType.MINOR.value:
-            version_parts[1] += 1
-            version_parts[2] = 0
-        elif release_type == ReleaseType.MAJOR.value:
-            version_parts[0] += 1
-            version_parts[1] = 0
-            version_parts[2] = 0
-        return '.'.join(str(i) for i in version_parts)
+    def _get_next_version_from_type(
+        self, 
+        current_version: str,
+        release_type: str, 
+        prerelease_type: Optional[Literal["rc", "alpha", "beta"]] = None
+    ) -> str:
+        return SemVersion(current_version).next_version(
+            release_type=release_type, 
+            prerelease_type=prerelease_type).to_string()

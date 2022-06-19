@@ -79,9 +79,10 @@ def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) 
 @click.pass_context
 @click.option('--type', '-t', type=click.Choice(['major', 'minor', 'patch']), required=True)
 @click.option('--description', '-d', required=True)
-def cli_add_change(ctx: click.Context, type: str, description: str) -> None:
+@click.option('--pre', '-p', type=click.Choice(['alpha', 'beta', 'rc']), help="Add a prerelease version.")
+def cli_add_change(ctx: click.Context, type: str, description: str, pre: str) -> None:
     releaser: Semversioner = ctx.obj['releaser']
-    path: str = releaser.add_change(type, description)
+    path: str = releaser.add_change(type, description, pre)
     click.echo(message="Successfully created file " + path)
 
 

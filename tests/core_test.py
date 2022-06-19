@@ -26,6 +26,7 @@ class CoreTestCase(unittest.TestCase):
 
     def test_increase_version(self) -> None:
         releaser = Semversioner(self.directory_name)
+        # Stable release
         self.assertEqual(releaser._get_next_version_from_type("1.0.0", "minor"), "1.1.0")
         self.assertEqual(releaser._get_next_version_from_type("1.0.0", "major"), "2.0.0")
         self.assertEqual(releaser._get_next_version_from_type("1.0.0", "patch"), "1.0.1")
@@ -35,6 +36,34 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "minor"), "9.10.0")
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major"), "10.0.0")
         self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "patch"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "minor"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "major"), "2.0.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "patch"), "2.1.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "minor"), "2.1.0")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "major"), "3.0.0")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "patch"), "2.1.1")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "minor"), "2.2.0")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "major"), "3.0.0")  # weird case (should we fail?)
+        # Pre-release
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "minor", "alpha"), "1.1.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "major", "alpha"), "2.0.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "patch", "alpha"), "1.0.1alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "minor", "alpha"), "0.2.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "major", "alpha"), "1.0.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "patch", "alpha"), "0.1.2alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "minor", "alpha"), "9.10.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major", "alpha"), "10.0.0alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch", "alpha"), "9.9.10alpha1")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "patch", "alpha"), "2.0.0alpha2")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "minor", "alpha"), "2.0.0alpha2")
+        self.assertEqual(releaser._get_next_version_from_type("2.0.0-alpha.1", "major", "alpha"), "2.0.0alpha2")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "patch", "beta"), "2.1.0beta1")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "minor", "beta"), "2.1.0beta1")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.0-alpha.1", "major", "beta"), "3.0.0beta1")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "patch", "rc"), "2.1.1rc1")
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "minor", "rc"), "2.2.0rc1")  # weird case (should we fail?)
+        self.assertEqual(releaser._get_next_version_from_type("2.1.1-alpha.1", "major", "rc"), "3.0.0rc1")  # weird case (should we fail?)
 
     def test_commands_with_no_changesets(self) -> None:
         releaser = Semversioner(path=self.directory_name)

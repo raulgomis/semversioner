@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 from abc import ABCMeta, abstractmethod
-from distutils.version import StrictVersion
+from packaging.version import parse
 from typing import List, Optional
 
 import click
@@ -45,7 +45,7 @@ class SemversionerStorage(metaclass=ABCMeta):
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):  # type: ignore
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            return dataclasses.asdict(o, dict_factory=lambda x: {k: v for (k, v) in x if v is not None})
         return super().default(o)
 
 
@@ -75,7 +75,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
     def is_deprecated(self) -> bool:
         return self.deprecated
 
-    def create_changeset(self, change_type: str, description: str) -> str:
+    def create_changeset(self, change_type: str, description: str, pre: Optional[str]) -> str:
         """ 
         Create a new changeset file.
 
@@ -93,7 +93,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        change = Changeset(type=change_type, description=description)
+        change = Changeset(type=change_type, description=description, pre=pre)
 
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
@@ -154,6 +154,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return None
 
     def _list_release_numbers(self) -> List[str]:
-        files = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
-        releases = sorted(list(map(lambda x: x[:-len('.json')], files)), key=StrictVersion, reverse=True)
+        files: List[str] = [f for f in os.listdir(self.semversioner_path) if os.path.isfile(os.path.join(self.semversioner_path, f))]
+        versions: List[str] = list(map(lambda x: x[:-len('.json')], files))
+        releases = sorted(versions, key=parse, reverse=True)
         return releases

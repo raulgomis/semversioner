@@ -55,7 +55,8 @@ class AddChangeCommandTest(CommandTest):
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
-            ["add-change", "--type", "patch", "--description", "This is my patch description"]
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description", "--pre", "rc"],
         ]
 
         result = command_processor(commands, self.directory_name)
@@ -70,7 +71,8 @@ class AddChangeCommandTest(CommandTest):
         expected = [
             json.loads('{"type": "major","description": "This is my major description"}'),
             json.loads('{"type": "minor","description": "This is my minor description"}'),
-            json.loads('{"type": "patch","description": "This is my patch description"}')
+            json.loads('{"type": "patch","description": "This is my patch description"}'),
+            json.loads('{"type": "patch","description": "This is my patch description", "pre": "rc"}'),
         ]
 
         self.assertListEqual(expected, data)
