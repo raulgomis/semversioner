@@ -113,7 +113,7 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]  # type: ignore
+        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]
 
         stable_releases = [x.pre for x in changes if x.pre is None]
         prereleases = [x.pre for x in changes if x.pre is not None]

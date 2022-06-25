@@ -74,7 +74,7 @@ class VersionTestCase(unittest.TestCase):
             with self.subTest():
                 self.assertEqual(SemVersion(p1).next_version(*p2), SemVersion(p3))
 
-    def test_comparison(self):
+    def test_comparison(self) -> None:
         assert SemVersion("1.2.32") > SemVersion("1.2.5")
         assert SemVersion("1.2.3") > SemVersion("1.2.3.rc3")
         assert SemVersion("1.2.3.rc3") > SemVersion("1.2.3.rc2")
@@ -85,7 +85,7 @@ class VersionTestCase(unittest.TestCase):
         assert SemVersion("1.2.3.dev3") < SemVersion("1.2.3a1")
         assert SemVersion("1.2.3.post3") > SemVersion("1.2.3")
 
-    def test_bump_prerelease(self):
+    def test_bump_prerelease(self) -> None:
         assert SemVersion("1.2.3")._bump_prerelease("patch", "rc").to_string() == "1.2.4rc1"
         assert SemVersion("1.2.3alpha")._bump_prerelease("patch", "alpha").to_string() == "1.2.3a2"
         assert SemVersion("1.2.3rc4")._bump_prerelease("patch", "rc").to_string() == "1.2.3rc5"
@@ -95,7 +95,7 @@ class VersionTestCase(unittest.TestCase):
         assert SemVersion("1.2.3a3")._bump_prerelease("patch", "alpha").to_string() == "1.2.3a4"
         assert SemVersion("1.2.3a3")._bump_prerelease("major", "rc").to_string() == "1.2.3rc1"
 
-    def test_get_stable(self):
+    def test_get_stable(self) -> None:
         assert SemVersion("1.2.3").get_stable().to_string() == "1.2.3"
         assert SemVersion("2.1.0a2").get_stable().to_string() == "2.1.0"
         assert SemVersion("1.2.5.post3").get_stable().to_string() == "1.2.5"

@@ -15,6 +15,7 @@ setup:
 .PHONY: lint
 lint:
 	@$(ENV)/bin/flake8
+	mypy semversioner tests
 
 .PHONY: test
 test:

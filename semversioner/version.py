@@ -1,9 +1,7 @@
-from typing import Literal, Optional, TypeVar
+from typing import Optional
 
 from semversioner.models import ReleaseType
 from packaging.version import Version, _Version as BaseVersion, InvalidVersion
-
-_T = TypeVar("_T", bound="SemVersion")
 
 
 class SemVersionError(InvalidVersion):
@@ -18,7 +16,7 @@ class SemVersion(Version):
             raise SemVersionError(e)
 
     @staticmethod
-    def from_string(version: str) -> _T:
+    def from_string(version: str) -> 'SemVersion':
         """
         Returns a new version from a string.
 
@@ -36,13 +34,13 @@ class SemVersion(Version):
 
     @staticmethod
     def from_params(
-        epoch,
-        release,
-        dev,
-        pre,
-        post,
-        local
-    ) -> _T:
+        epoch: int,
+        release: tuple,
+        dev: Optional[int] = None,
+        pre: Optional[tuple] = None,
+        post: Optional[int] = None,
+        local: Optional[str] = None
+    ) -> 'SemVersion':
         """
         Returns a new version from the parameters.
         """
@@ -64,13 +62,13 @@ class SemVersion(Version):
         """
         return str(self)
 
-    def clone(self: _T) -> _T:
+    def clone(self) -> 'SemVersion':
         """
         Returns a clone of the version.
         """
         return self.__class__(self.to_string())
 
-    def get_stable(self: _T) -> _T:
+    def get_stable(self) -> 'SemVersion':
         return SemVersion.from_params(
             epoch=0,
             release=(self.major, self.minor, self.micro),
@@ -85,7 +83,7 @@ class SemVersion(Version):
         return not self.is_prerelease
 
     @property
-    def prerelease_type(self) -> Optional[Literal["rc", "alpha", "beta"]]:
+    def prerelease_type(self) -> Optional[str]:
         if not self.pre:
             return None
 
@@ -101,8 +99,8 @@ class SemVersion(Version):
 
     def _bump_stable_release(
         self,
-        release_type: Literal["major", "minor", "patch"]
-    ) -> _T:
+        release_type: str
+    ) -> 'SemVersion':
         """
         Bump the release self.
         """
@@ -128,20 +126,20 @@ class SemVersion(Version):
 
     def _bump_prerelease(
         self,
-        release_type: Literal["major", "minor", "patch"], 
-        prerelease_type: Literal["rc", "alpha", "beta", "a", "b"] = "rc"
-    ) -> _T:
+        release_type: str, 
+        prerelease_type: str = "rc"
+    ) -> 'SemVersion':
         """
         Bump the prerelease version.
         """
 
-        inc = 1 if not self.is_prerelease else (max(1, self.pre[-1]) + 1)
+        inc = 1 if not self.is_prerelease else (max(1, self.pre[-1]) + 1)  # type: ignore
 
         ptype = prerelease_type or self.prerelease_type or "rc"
 
         pre = (ptype, inc)
 
-        new_version = SemVersion.from_params(
+        new_version: 'SemVersion' = SemVersion.from_params(
             epoch=self.epoch,
             release=self.release,
             pre=pre,
@@ -168,17 +166,17 @@ class SemVersion(Version):
 
     def next_version(
         self, 
-        release_type: Literal["major", "minor", "patch"], 
-        prerelease_type: Optional[Literal["rc", "alpha", "beta"]] = None
-    ) -> _T:
+        release_type: str, 
+        prerelease_type: Optional[str] = None
+    ) -> 'SemVersion':
         """
         Returns the next version.
 
         Parameters
         ----------
-        release_type : Literal["major", "minor", "patch"]
+        release_type : str
             Type of release.
-        prerelease_type : Optional[Literal["rc", "alpha", "beta"]]
+        prerelease_type : Optional[str]
             Type of prerelease.
 
         Returns

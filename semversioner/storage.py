@@ -18,7 +18,7 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def create_changeset(self, change_type: str, description: str) -> str:
+    def create_changeset(self, change_type: str, description: str, pre: Optional[str]) -> str:
         pass
 
     @abstractmethod
