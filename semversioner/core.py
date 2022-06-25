@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List, Optional, Literal
+from typing import List, Optional
 
 import click
 from jinja2 import Template
@@ -115,13 +115,20 @@ class Semversioner:
 
         release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]  # type: ignore
 
+        stable_releases = [x.pre for x in changes if x.pre is None]
         prereleases = [x.pre for x in changes if x.pre is not None]
+
+        if len(stable_releases) > 0 and len(prereleases) > 0:
+            click.secho("Error: Cannot have both stable and prerelease changes in the same release.", fg='red')
+            sys.exit(-1)
+
         prerelease_type = None
         if len(prereleases) > 0:
             prerelease_type = sorted(list(prereleases), reverse=True)[0]
 
-        next_version: str = self._get_next_version_from_type(current_version_number, release_type, prerelease_type)
-        return next_version
+        return SemVersion(current_version_number).next_version(
+            release_type=release_type, 
+            prerelease_type=prerelease_type).to_string()
 
     def get_status(self) -> ReleaseStatus:
         """
@@ -132,13 +139,3 @@ class Semversioner:
         next_version = self.get_next_version(changes, version)
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
-
-    def _get_next_version_from_type(
-        self, 
-        current_version: str,
-        release_type: str, 
-        prerelease_type: Optional[Literal["rc", "alpha", "beta"]] = None
-    ) -> str:
-        return SemVersion(current_version).next_version(
-            release_type=release_type, 
-            prerelease_type=prerelease_type).to_string()

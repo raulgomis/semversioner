@@ -56,7 +56,7 @@ class SemVersion(Version):
             post=post,
             local=local
         )
-        return version
+        return version.clone()
 
     def to_string(self) -> str:
         """
@@ -70,9 +70,38 @@ class SemVersion(Version):
         """
         return self.__class__(self.to_string())
 
+    def get_stable(self: _T) -> _T:
+        return SemVersion.from_params(
+            epoch=0,
+            release=(self.major, self.minor, self.micro),
+            pre=None,
+            post=None,
+            dev=None,
+            local=None,
+        )
+
+    @property
+    def is_stable(self) -> bool:
+        return not self.is_prerelease
+
+    @property
+    def prerelease_type(self) -> Optional[Literal["rc", "alpha", "beta"]]:
+        if not self.pre:
+            return None
+
+        letter = self.pre[0]
+        if letter == "rc":
+            return "rc"
+        if letter == "a":
+            return "alpha"
+        if letter == "b":
+            return "beta"
+
+        return None
+
     def _bump_stable_release(
         self,
-        release_type: Literal['major', 'minor', 'patch']
+        release_type: Literal["major", "minor", "patch"]
     ) -> _T:
         """
         Bump the release self.
@@ -108,16 +137,7 @@ class SemVersion(Version):
 
         inc = 1 if not self.is_prerelease else (max(1, self.pre[-1]) + 1)
 
-        version_pre = "rc"
-        letter = self.pre[0] if self.pre else prerelease_type
-        if letter == "rc":
-            version_pre = "rc"
-        if letter == "a":
-            version_pre = "alpha"
-        if letter == "b":
-            version_pre = "beta"
-
-        ptype = prerelease_type or version_pre or "rc"
+        ptype = prerelease_type or self.prerelease_type or "rc"
 
         pre = (ptype, inc)
 
@@ -134,13 +154,13 @@ class SemVersion(Version):
             ptype = prerelease_type or "rc"
             new_version = self._bump_stable_release(release_type)
 
-        if prerelease_type != version_pre:
+        if prerelease_type != self.prerelease_type:
             inc = 1
 
         return SemVersion.from_params(
             epoch=0,
             release=new_version.release,
-            pre=(prerelease_type, inc),
+            pre=(ptype, inc),
             post=None,
             dev=None,
             local=None,
@@ -172,9 +192,9 @@ class SemVersion(Version):
             SemVersion('1.0.0').next_version('major') # '2.0.0'
             SemVersion('1.0.0').next_version('minor') # '1.1.0'
             SemVersion('1.0.0').next_version('patch') # '1.0.1'
-            SemVersion(''2.0.0-alpha.1').next_version('major') # '2.0.0'
-            SemVersion(''2.0.0-alpha.1').next_version('minor') # '2.0.0'
-            SemVersion(''2.0.0-alpha.1').next_version('patch') # '2.0.0'
+            SemVersion('2.0.0-alpha.1').next_version('major') # '2.0.0'
+            SemVersion('2.0.0-alpha.1').next_version('minor') # '2.0.0'
+            SemVersion('2.0.0-alpha.1').next_version('patch') # '2.0.0'
             SemVersion('1.0.0').next_version('major', 'alpha') # '2.0.0-alpha.1'
             SemVersion('1.0.0').next_version('minor', 'alpha') # '1.1.0-alpha.1'
             SemVersion('2.0.0-alpha.1').next_version('major', 'alpha') # '2.0.0-alpha.2'
