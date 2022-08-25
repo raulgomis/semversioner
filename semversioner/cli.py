@@ -26,6 +26,7 @@ Usage
     $ semversioner add-change --type major --description "This description will appear in the change log"
     $ semversioner release
     $ semversioner changelog > CHANGELOG.md
+    $ semversioner next-version
 """
 
 import os
@@ -90,6 +91,14 @@ def cli_add_change(ctx: click.Context, type: str, description: str) -> None:
 def cli_current_version(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj['releaser']
     version = releaser.get_last_version()
+    click.echo(message=version)
+
+
+@cli.command('next-version', help="Show computed next version.")
+@click.pass_context
+def cli_next_version(ctx: click.Context) -> None:
+    releaser: Semversioner = ctx.obj['releaser']
+    version = releaser.next_version()
     click.echo(message=version)
 
 

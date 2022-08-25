@@ -101,6 +101,17 @@ class Semversioner:
 
         return Release(version=next_version_number, changes=changes)
 
+    def next_version(self) -> str:
+        changes: List[Changeset] = self.fs.list_changesets()
+        current_version_number = self.get_last_version()
+        next_version_number = self.get_next_version(changes, current_version_number)
+
+        if next_version_number is None:
+            click.secho("Error: No changes to release. Skipping release process.", fg='red')
+            sys.exit(-1)
+
+        click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
+
     def get_last_version(self) -> str:
         """ 
         Gets the current version.

@@ -92,6 +92,16 @@ Alternatively, you can use the following command to filter changes by the last r
 ```shell
 $ semversioner changelog --version $(semversioner current-version)
 ```
+### Getting next version
+
+As part of the CI/CD workflow, sometimes you want to release dev, rc, or other pre-release packages. For this purpose, 
+the next-version command can be issued, to compute the next version based on the current change set. This will
+not change any files on disk, and they are as such preserved for any future release.
+
+```shell
+$ semversioner next-version
+```
+
 
 ## License
 Copyright (c) 2021 Raul Gomis.
