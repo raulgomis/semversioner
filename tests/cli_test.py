@@ -258,8 +258,8 @@ class NextVersionCommandTest(CommandTest):
     def test_cli_execution_next_version(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli=cli, args=["next-version"])
+        assert "Error: No changes found. No next version available." in result.output
         assert result.exit_code == -1
-        assert "Error: No changes to release. Skipping release process." in result.output
 
     def test_cli_execution_next_change(self) -> None:
         commands = [
@@ -268,7 +268,7 @@ class NextVersionCommandTest(CommandTest):
         ]
 
         result = command_processor(commands, self.directory_name)
-        self.assertIn("0.1.0", result.output)
+        self.assertEqual("0.1.0", result.output)
 
     def test_cli_execution_next_change_existing_version(self) -> None:
         commands = [
@@ -279,7 +279,7 @@ class NextVersionCommandTest(CommandTest):
         ]
 
         result = command_processor(commands, self.directory_name)
-        self.assertIn("0.2.0", result.output)
+        self.assertEqual("0.2.0", result.output)
 
 
 class StatusCommandTest(CommandTest):

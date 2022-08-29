@@ -89,7 +89,7 @@ class Semversioner:
         changes: List[Changeset] = self.fs.list_changesets()
 
         current_version_number = self.get_last_version()
-        next_version_number = self.get_next_version(changes, current_version_number)
+        next_version_number = self.get_next_version()
 
         if next_version_number is None:
             click.secho("Error: No changes to release. Skipping release process.", fg='red')
@@ -101,17 +101,6 @@ class Semversioner:
 
         return Release(version=next_version_number, changes=changes)
 
-    def next_version(self) -> str:
-        changes: List[Changeset] = self.fs.list_changesets()
-        current_version_number = self.get_last_version()
-        next_version_number = self.get_next_version(changes, current_version_number)
-
-        if next_version_number is None:
-            click.secho("Error: No changes to release. Skipping release process.", fg='red')
-            sys.exit(-1)
-
-        click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
-
     def get_last_version(self) -> str:
         """ 
         Gets the current version.
@@ -119,7 +108,10 @@ class Semversioner:
         """
         return self.fs.get_last_version() or INITIAL_VERSION
 
-    def get_next_version(self, changes: List[Changeset], current_version_number: str) -> Optional[str]:
+    def get_next_version(self) -> str:
+        changes = self.fs.list_changesets()
+        current_version_number = self.get_last_version()
+
         if len(changes) == 0:
             return None
 
@@ -133,7 +125,7 @@ class Semversioner:
         """
         version = self.get_last_version()
         changes = self.fs.list_changesets()
-        next_version = self.get_next_version(changes, version)
+        next_version = self.get_next_version()
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 
