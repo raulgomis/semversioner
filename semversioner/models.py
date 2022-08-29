@@ -3,6 +3,14 @@ from enum import Enum
 from typing import List, Optional
 
 
+class SemversionerException(Exception):
+    pass
+
+
+class MissingChangesetFilesException(SemversionerException):
+    pass
+
+
 class ReleaseType(Enum):
     """
     Represents the type of release.
