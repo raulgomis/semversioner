@@ -96,7 +96,7 @@ class Semversioner:
         changes: List[Changeset] = self.fs.list_changesets()
 
         current_version_number = self.get_last_version()
-        next_version_number = self.get_next_version(changes, current_version_number)
+        next_version_number = self.get_next_version()
 
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
         self.fs.create_version(version=next_version_number, changes=changes)  # type: ignore[arg-type]
@@ -111,10 +111,13 @@ class Semversioner:
         """
         return self.fs.get_last_version() or INITIAL_VERSION
 
-    def get_next_version(self, changes: List[Changeset], current_version_number: str) -> Optional[str]:
+    def get_next_version(self) -> Optional[str]:
         """
         Gets the next version. Returns None is there are not changeset files created.
         """
+        changes = self.fs.list_changesets()
+        current_version_number = self.get_last_version()
+
         if len(changes) == 0:
             # raise MissingChangesetFilesException()
             return None
@@ -129,7 +132,7 @@ class Semversioner:
         """
         version = self.get_last_version()
         changes = self.fs.list_changesets()
-        next_version = self.get_next_version(changes, version)
+        next_version = self.get_next_version()
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 

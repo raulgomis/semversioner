@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.2.0
+
+- minor: Added command next-version, to compute the version of the next release, without actually performing the release
+
 ## 1.1.0
 
 - minor: Expose models to use semversioner as a library.
