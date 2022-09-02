@@ -26,9 +26,11 @@ Usage
     $ semversioner add-change --type major --description "This description will appear in the change log"
     $ semversioner release
     $ semversioner changelog > CHANGELOG.md
+    $ semversioner next-version
 """
 
 import os
+import sys
 from typing import Optional, TextIO
 
 import click
@@ -91,6 +93,18 @@ def cli_current_version(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj['releaser']
     version = releaser.get_last_version()
     click.echo(message=version)
+
+
+@cli.command('next-version', help="Show computed next version.")
+@click.pass_context
+def cli_next_version(ctx: click.Context) -> None:
+    releaser: Semversioner = ctx.obj['releaser']
+    version = releaser.get_next_version()
+    if version is None:
+        click.echo(message="Error: No changes found. No next version available.")
+        sys.exit(-1)
+
+    click.echo(message=version, nl=False)
 
 
 @cli.command('status', help="Show the status of the working directory.")

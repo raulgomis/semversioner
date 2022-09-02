@@ -253,6 +253,35 @@ class CurrentVersionCommandTest(CommandTest):
         self.assertIn("0.1.0", result.output)
 
 
+class NextVersionCommandTest(CommandTest):
+
+    def test_cli_execution_next_version(self) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli=cli, args=["next-version"])
+        assert "Error: No changes found. No next version available." in result.output
+        assert result.exit_code == -1
+
+    def test_cli_execution_next_change(self) -> None:
+        commands = [
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["next-version"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual("0.1.0", result.output)
+
+    def test_cli_execution_next_change_existing_version(self) -> None:
+        commands = [
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["release"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["next-version"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual("0.2.0", result.output)
+
+
 class StatusCommandTest(CommandTest):
 
     def test_status_command_with_no_changes(self) -> None:
