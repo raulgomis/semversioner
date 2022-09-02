@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Add CLI command to detect missing changeset files before merging to the destination branch."
-}

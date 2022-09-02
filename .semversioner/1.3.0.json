@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Add CLI command to detect missing changeset files before merging to the destination branch.",
+    "type": "minor"
+  },
+  {
+    "description": "Add exception handling support to use Semversioner as a library.",
+    "type": "minor"
+  },
+  {
+    "description": "Fix next-version error command color.",
+    "type": "patch"
+  }
+]

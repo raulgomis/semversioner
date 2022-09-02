@@ -1,6 +1,12 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.3.0
+
+- minor: Add CLI command to detect missing changeset files before merging to the destination branch.
+- minor: Add exception handling support to use Semversioner as a library.
+- patch: Fix next-version error command color.
+
 ## 1.2.0
 
 - minor: Added command next-version, to compute the version of the next release, without actually performing the release
