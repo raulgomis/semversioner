@@ -108,7 +108,7 @@ class Semversioner:
         """
         return self.fs.get_last_version() or INITIAL_VERSION
 
-    def get_next_version(self) -> str:
+    def get_next_version(self) -> Optional[str]:
         changes = self.fs.list_changesets()
         current_version_number = self.get_last_version()
 

@@ -227,7 +227,7 @@ class ChangelogCommandTest(CommandTest):
 
     def test_generate_changelog_with_custom_not_existent(self) -> None:  
         runner = CliRunner()
-        result = runner.invoke(cli=cli, args=["changelog", "--template", "non-existent-file.j2"])
+        result = runner.invoke(cli=cli, args=["--path", self.directory_name, "changelog", "--template", "non-existent-file.j2"])
         assert result.exit_code == 2
         assert "Error: Invalid value for '--template': 'non-existent-file.j2': No such file or directory" in result.output
 
@@ -257,7 +257,7 @@ class NextVersionCommandTest(CommandTest):
 
     def test_cli_execution_next_version(self) -> None:
         runner = CliRunner()
-        result = runner.invoke(cli=cli, args=["next-version"])
+        result = runner.invoke(cli=cli, args=["--path", self.directory_name, "next-version"])
         assert "Error: No changes found. No next version available." in result.output
         assert result.exit_code == -1
 
@@ -315,7 +315,7 @@ class StatusCommandTest(CommandTest):
 class CliVersionCommandTest(CommandTest):
     def test_cli_version(self) -> None:
         runner = CliRunner()
-        result = runner.invoke(cli=cli, args=['--version'])
+        result = runner.invoke(cli=cli, args=["--path", self.directory_name, '--version'])
 
         assert not result.exception
         assert result.exit_code == 0
