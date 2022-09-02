@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Added command next-version, to compute the version of the next release, without actually performing the release"
-}
