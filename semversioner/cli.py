@@ -37,7 +37,7 @@ import click
 
 from semversioner import __version__
 from semversioner.core import Semversioner
-from semversioner.models import Release, ReleaseStatus
+from semversioner.models import (MissingChangesetException, Release, ReleaseStatus)
 
 ROOTDIR = os.getcwd()
 
@@ -60,7 +60,10 @@ def cli_release(ctx: click.Context) -> None:
         click.secho("WARN", bg='yellow', fg='black', nl=False)
         click.secho(" deprecated ", fg='magenta', nl=False)
         click.echo("Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message.")
-    result: Release = releaser.release()
+    try:
+        result: Release = releaser.release()
+    except MissingChangesetException:
+        click.secho("Error: No changes to release. Skipping release process.", fg='red')
     click.echo(message="Successfully created new release: " + result.version)
 
 
@@ -101,7 +104,7 @@ def cli_next_version(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj['releaser']
     version = releaser.get_next_version()
     if version is None:
-        click.echo(message="Error: No changes found. No next version available.")
+        click.secho(message="Error: No changes found. No next version available.", fg='red')
         sys.exit(-1)
 
     click.echo(message=version, nl=False)
@@ -121,6 +124,17 @@ def status(ctx: click.Context) -> None:
         click.echo(message="(use \"semversioner release\" to release the next version)")
     else:
         click.echo(message="No changes to release (use \"semversioner add-change\")")
+
+
+@cli.command('check', help="Verifies changeset files exist.")
+@click.pass_context
+def cli_check(ctx: click.Context) -> None:
+    releaser: Semversioner = ctx.obj['releaser']
+    if not releaser.check():
+        click.secho("Error: No changes to release.", fg='red')
+        sys.exit(-1)
+    else:
+        click.echo('OK')
 
 
 def main() -> None:

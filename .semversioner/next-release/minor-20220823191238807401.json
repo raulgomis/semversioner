@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Add exception handling support to use Semversioner as a library."
+}

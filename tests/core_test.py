@@ -5,7 +5,7 @@ import tempfile
 
 from semversioner import Semversioner
 from semversioner import ReleaseStatus
-from semversioner.models import Changeset
+from semversioner.models import Changeset, MissingChangesetException
 
 
 class CoreTestCase(unittest.TestCase):
@@ -41,7 +41,7 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser.generate_changelog(), "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
         self.assertEqual(releaser.get_last_version(), "0.0.0")
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(MissingChangesetException):
             releaser.release()
 
     def test_release(self) -> None:
@@ -56,7 +56,7 @@ class CoreTestCase(unittest.TestCase):
         ))
         releaser.release()
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(MissingChangesetException):
             releaser.release()
 
     def test_release_stress(self) -> None:
@@ -76,6 +76,26 @@ class CoreTestCase(unittest.TestCase):
     def test_is_deprecated(self) -> None:
         releaser = Semversioner(self.directory_name)
         self.assertFalse(releaser.is_deprecated())
+
+    def test_check_nok(self) -> None:
+
+        releaser = Semversioner(path=self.directory_name)
+        self.assertFalse(releaser.check())
+
+    def test_check_ok(self) -> None:
+
+        releaser = Semversioner(path=self.directory_name)
+
+        self.assertFalse(releaser.check())
+        releaser.add_change("major", "My description")
+        self.assertTrue(releaser.check())
+
+    def test_check_after_release(self) -> None:
+
+        releaser = Semversioner(path=self.directory_name)
+        releaser.add_change("major", "My description")
+        releaser.release()
+        self.assertFalse(releaser.check())
 
 
 if __name__ == '__main__':

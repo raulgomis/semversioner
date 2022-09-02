@@ -1,11 +1,10 @@
 import os
-import sys
 from typing import List, Optional
 
 import click
 from jinja2 import Template
-from semversioner.models import Changeset, Release, ReleaseStatus, ReleaseType
 
+from semversioner.models import (Changeset, MissingChangesetException, Release, ReleaseStatus, ReleaseType)
 from semversioner.storage import SemversionerFileSystemStorage
 
 ROOTDIR = os.getcwd()
@@ -85,30 +84,37 @@ class Semversioner:
             Previous version.
         new_version : str
             New version.
+
+        Raises
+        -------
+        MissingChangesetException: SemversionerException
         """
-        changes: List[Changeset] = self.fs.list_changesets()
+
+        if not self.check():
+            raise MissingChangesetException()
 
         current_version_number = self.get_last_version()
         next_version_number = self.get_next_version()
-
-        if next_version_number is None:
-            click.secho("Error: No changes to release. Skipping release process.", fg='red')
-            sys.exit(-1)
+        changes: List[Changeset] = self.fs.list_changesets()
 
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
-        self.fs.create_version(version=next_version_number, changes=changes)
+
+        self.fs.create_version(version=next_version_number, changes=changes)  # type: ignore[arg-type]
         self.fs.remove_all_changesets()
 
-        return Release(version=next_version_number, changes=changes)
+        return Release(version=next_version_number, changes=changes)  # type: ignore[arg-type]
 
     def get_last_version(self) -> str:
         """ 
-        Gets the current version.
+        Gets the current version. Returns '0.0.0' if there are not versions created.
 
         """
         return self.fs.get_last_version() or INITIAL_VERSION
 
     def get_next_version(self) -> Optional[str]:
+        """
+        Gets the next version. Returns None is there are not changeset files created.
+        """
         changes = self.fs.list_changesets()
         current_version_number = self.get_last_version()
 
@@ -128,6 +134,14 @@ class Semversioner:
         next_version = self.get_next_version()
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
+
+    def check(self) -> bool:
+        """
+        Check if changeset files are present.
+        This is useful to enforce that changeset files are present before merging PRs to the target branch.
+        """
+        changes: List[Changeset] = self.fs.list_changesets()
+        return len(changes) > 0
 
     def _get_next_version_from_type(self, current_version: str, release_type: str) -> str:
         """ 

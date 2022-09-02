@@ -14,7 +14,8 @@ setup:
 
 .PHONY: lint
 lint:
-	@$(ENV)/bin/flake8
+	@$(ENV)/bin/flake8 . --count --show-source --statistics
+	@$(ENV)/bin/mypy semversioner tests
 
 .PHONY: test
 test:

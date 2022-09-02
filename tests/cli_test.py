@@ -25,6 +25,13 @@ def command_processor(commands: List[List[str]], path: str) -> Result:
     return result
 
 
+def single_command_processor(command: List[str], path: str) -> Result:
+    runner = CliRunner()
+    command_with_path = ["--path", path] + command
+    result: Result = runner.invoke(cli, command_with_path)
+    return result
+
+
 def get_file(filename: str) -> Path: 
     return files('tests.resources').joinpath(filename)  # type: ignore
 
@@ -225,9 +232,8 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\n")
 
-    def test_generate_changelog_with_custom_not_existent(self) -> None:  
-        runner = CliRunner()
-        result = runner.invoke(cli=cli, args=["--path", self.directory_name, "changelog", "--template", "non-existent-file.j2"])
+    def test_generate_changelog_with_custom_not_existent(self) -> None: 
+        result = single_command_processor(["changelog", "--template", "non-existent-file.j2"], self.directory_name)
         assert result.exit_code == 2
         assert "Error: Invalid value for '--template': 'non-existent-file.j2': No such file or directory" in result.output
 
@@ -312,11 +318,28 @@ class StatusCommandTest(CommandTest):
         self.assertEqual(fixtures.TEST_STATUS_COMMAND_WITH_UNRELEASED_CHANGES, result.output)
 
 
+class CheckCommandTest(CommandTest):
+
+    def test_check_ok(self) -> None:
+        commands = [
+            ["add-change", "--type", "major", "--description", "This is my major description"],
+            ["add-change", "--type", "minor", "--description", "This is my minor description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["check"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual('OK\n', result.output)
+
+    def test_check_nok(self) -> None:
+        result = single_command_processor(["check"], self.directory_name)
+        assert result.exit_code == -1
+        assert "Error: No changes to release." in result.output
+
+
 class CliVersionCommandTest(CommandTest):
     def test_cli_version(self) -> None:
-        runner = CliRunner()
-        result = runner.invoke(cli=cli, args=["--path", self.directory_name, '--version'])
-
+        result = single_command_processor(["--version"], self.directory_name)
         assert not result.exception
         assert result.exit_code == 0
         assert __version__.__version__ in result.output
