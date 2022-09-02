@@ -4,7 +4,7 @@ from typing import List, Optional
 import click
 from jinja2 import Template
 
-from semversioner.models import (Changeset, MissingChangesetFilesException, Release, ReleaseStatus, ReleaseType)
+from semversioner.models import (Changeset, MissingChangesetException, Release, ReleaseStatus, ReleaseType)
 from semversioner.storage import SemversionerFileSystemStorage
 
 ROOTDIR = os.getcwd()
@@ -87,18 +87,18 @@ class Semversioner:
 
         Raises
         -------
-        MissingChangesetFilesException: SemversionerException
+        MissingChangesetException: SemversionerException
         """
 
         if not self.check():
-            raise MissingChangesetFilesException()
-
-        changes: List[Changeset] = self.fs.list_changesets()
+            raise MissingChangesetException()
 
         current_version_number = self.get_last_version()
         next_version_number = self.get_next_version()
+        changes: List[Changeset] = self.fs.list_changesets()
 
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
+
         self.fs.create_version(version=next_version_number, changes=changes)  # type: ignore[arg-type]
         self.fs.remove_all_changesets()
 
@@ -119,7 +119,6 @@ class Semversioner:
         current_version_number = self.get_last_version()
 
         if len(changes) == 0:
-            # raise MissingChangesetFilesException()
             return None
 
         release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]

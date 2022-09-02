@@ -4,10 +4,16 @@ from typing import List, Optional
 
 
 class SemversionerException(Exception):
+    """
+    Base Exception
+    """
     pass
 
 
-class MissingChangesetFilesException(SemversionerException):
+class MissingChangesetException(SemversionerException):
+    """
+    Missing changeset files
+    """
     pass
 
 

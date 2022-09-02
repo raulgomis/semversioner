@@ -5,7 +5,7 @@ import tempfile
 
 from semversioner import Semversioner
 from semversioner import ReleaseStatus
-from semversioner.models import Changeset, MissingChangesetFilesException
+from semversioner.models import Changeset, MissingChangesetException
 
 
 class CoreTestCase(unittest.TestCase):
@@ -41,7 +41,7 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser.generate_changelog(), "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
         self.assertEqual(releaser.get_last_version(), "0.0.0")
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(MissingChangesetFilesException):
+        with self.assertRaises(MissingChangesetException):
             releaser.release()
 
     def test_release(self) -> None:
@@ -56,7 +56,7 @@ class CoreTestCase(unittest.TestCase):
         ))
         releaser.release()
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(MissingChangesetFilesException):
+        with self.assertRaises(MissingChangesetException):
             releaser.release()
 
     def test_release_stress(self) -> None:

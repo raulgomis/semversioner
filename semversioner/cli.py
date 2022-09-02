@@ -37,8 +37,7 @@ import click
 
 from semversioner import __version__
 from semversioner.core import Semversioner
-from semversioner.models import (MissingChangesetFilesException, Release,
-                                 ReleaseStatus)
+from semversioner.models import (MissingChangesetException, Release, ReleaseStatus)
 
 ROOTDIR = os.getcwd()
 
@@ -63,7 +62,7 @@ def cli_release(ctx: click.Context) -> None:
         click.echo("Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message.")
     try:
         result: Release = releaser.release()
-    except MissingChangesetFilesException:
+    except MissingChangesetException:
         click.secho("Error: No changes to release. Skipping release process.", fg='red')
     click.echo(message="Successfully created new release: " + result.version)
 
@@ -105,7 +104,7 @@ def cli_next_version(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj['releaser']
     version = releaser.get_next_version()
     if version is None:
-        click.echo(message="Error: No changes found. No next version available.")
+        click.secho(message="Error: No changes found. No next version available.", fg='red')
         sys.exit(-1)
 
     click.echo(message=version, nl=False)
