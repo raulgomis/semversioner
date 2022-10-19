@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -81,7 +82,7 @@ class AddChangeCommandTest(CommandTest):
         ]
 
         self.assertListEqual(expected, data)
-        self.assertRegex(result.output, f"Successfully created file {self.next_release_dirname}.*\\.json")
+        self.assertRegex(result.output, f"Successfully created file {re.escape(self.next_release_dirname)}.*\.json")
 
 
 class ReleaseCommandTest(CommandTest):
