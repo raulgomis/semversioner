@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -81,7 +82,7 @@ class AddChangeCommandTest(CommandTest):
         ]
 
         self.assertListEqual(expected, data)
-        self.assertRegex(result.output, f"Successfully created file {self.next_release_dirname}.*\\.json")
+        self.assertRegex(result.output, f"Successfully created file {re.escape(self.next_release_dirname)}.*\.json")
 
 
 class ReleaseCommandTest(CommandTest):
@@ -95,7 +96,7 @@ class ReleaseCommandTest(CommandTest):
         ]
 
         result = command_processor(commands, self.directory_name)
-        self.assertEqual(result.output, f"Releasing version: 0.0.0 -> 1.0.0\nGenerated '{self.changes_dirname}/1.0.0.json' file.\nRemoving '{self.next_release_dirname}' directory.\nSuccessfully created new release: 1.0.0\n")
+        self.assertEqual(result.output, f"Releasing version: 0.0.0 -> 1.0.0\nGenerated '{os.path.join(self.changes_dirname, '1.0.0.json')}' file.\nRemoving '{self.next_release_dirname}' directory.\nSuccessfully created new release: 1.0.0\n")
 
 
 class ChangelogCommandTest(CommandTest):
