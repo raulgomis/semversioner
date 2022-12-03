@@ -1,14 +1,17 @@
 import os
+from datetime import datetime, timezone
 from typing import List, Optional
 
 import click
 from jinja2 import Template
 
-from semversioner.models import (Changeset, MissingChangesetException, Release, ReleaseStatus, ReleaseType)
+from semversioner.models import (Changeset, MissingChangesetException, Release,
+                                 ReleaseStatus, ReleaseType)
 from semversioner.storage import SemversionerFileSystemStorage
 
 ROOTDIR = os.getcwd()
 INITIAL_VERSION = '0.0.0'
+# To add support for dates you can use: {{ ' (' + release.created_at.strftime("%m-%d-%Y") + ')' if release.created_at }}
 DEFAULT_TEMPLATE = """# Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 {% for release in releases %}
@@ -48,7 +51,7 @@ class Semversioner:
             Absolute path of the file generated.
         """
 
-        return self.fs.create_changeset(change_type=change_type, description=description)
+        return self.fs.create_changeset(Changeset(type=change_type, description=description))
 
     def generate_changelog(self, version: Optional[str] = None, template: str = DEFAULT_TEMPLATE) -> str:
         """ 
@@ -99,10 +102,13 @@ class Semversioner:
 
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
 
-        self.fs.create_version(version=next_version_number, changes=changes)  # type: ignore[arg-type]
+        datetime_now = datetime.now(timezone.utc)
+        release = Release(version=next_version_number, changes=changes, created_at=datetime_now)
+
+        self.fs.create_version(release)  # type: ignore[arg-type]
         self.fs.remove_all_changesets()
 
-        return Release(version=next_version_number, changes=changes)  # type: ignore[arg-type]
+        return release  # type: ignore[arg-type]
 
     def get_last_version(self) -> str:
         """ 

@@ -62,9 +62,9 @@ def cli_release(ctx: click.Context) -> None:
         click.echo("Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message.")
     try:
         result: Release = releaser.release()
+        click.echo(message="Successfully created new release: " + result.version)
     except MissingChangesetException:
         click.secho("Error: No changes to release. Skipping release process.", fg='red')
-    click.echo(message="Successfully created new release: " + result.version)
 
 
 @cli.command('changelog', help="Print the changelog.")
