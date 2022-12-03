@@ -1,5 +1,5 @@
 import dataclasses
-import datetime
+from datetime import datetime
 import json
 import os
 from abc import ABCMeta, abstractmethod
@@ -18,7 +18,7 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def create_changeset(self, change_type: str, description: str) -> str:
+    def create_changeset(self, change: Changeset) -> str:
         pass
 
     @abstractmethod
@@ -30,7 +30,7 @@ class SemversionerStorage(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def create_version(self, version: str, changes: List[Changeset]) -> None:
+    def create_version(self, release: Release) -> None:
         pass
 
     @abstractmethod
@@ -47,6 +47,36 @@ class EnhancedJSONEncoder(json.JSONEncoder):
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         return super().default(o)
+
+
+class ReleaseJsonMapper:
+    """
+    Release Json Mapper class
+    """
+
+    @staticmethod
+    def to_json(release: Release) -> str:
+        data = {
+            'version': release.version,
+            'created_at': release.created_at.isoformat() if release.created_at else None,
+            'changes': release.changes
+        }
+
+        return json.dumps(data, cls=EnhancedJSONEncoder, indent=2, sort_keys=True)
+
+    @staticmethod
+    def from_json(data: dict, release_identifier: str) -> Release:
+        created_at: Optional[datetime] = None
+
+        if 'created_at' in data:  # New format
+            created_at = datetime.fromisoformat(data['created_at'])
+            version = data['version']
+            changes = sorted(data['changes'], key=lambda k: k['type'] + k['description'])  # type: ignore
+        else:
+            changes = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
+            version = release_identifier
+
+        return Release(version=version, changes=changes, created_at=created_at)
 
 
 class SemversionerFileSystemStorage(SemversionerStorage):
@@ -75,7 +105,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
     def is_deprecated(self) -> bool:
         return self.deprecated
 
-    def create_changeset(self, change_type: str, description: str) -> str:
+    def create_changeset(self, change: Changeset) -> str:
         """ 
         Create a new changeset file.
 
@@ -84,8 +114,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
 
         Parameters
         -------
-        change_type (str): Change type. Allowed values: major, minor, patch.
-        description (str): Change description.
+        change (Changeset): Changeset.
 
         Returns
         -------
@@ -93,13 +122,11 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        change = Changeset(type=change_type, description=description)
-
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
             filename = '{type_name}-{datetime}.json'.format(
                 type_name=change.type,
-                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.datetime.utcnow())
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.utcnow())
             )
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:
@@ -128,10 +155,11 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         changes = sorted(changes, key=lambda k: k.type + k.description)
         return changes
 
-    def create_version(self, version: str, changes: List[Changeset]) -> None:
+    def create_version(self, release: Release) -> None:
+        version: str = release.version
         release_json_filename: str = os.path.join(self.semversioner_path, '%s.json' % version)
         with open(release_json_filename, 'w') as f:
-            f.write(json.dumps(changes, cls=EnhancedJSONEncoder, indent=2, sort_keys=True))
+            f.write(ReleaseJsonMapper.to_json(release))
         click.echo("Generated '" + release_json_filename + "' file.")
 
     def list_versions(self) -> List[Release]:
@@ -139,8 +167,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         for release_identifier in self._list_release_numbers():
             with open(os.path.join(self.semversioner_path, release_identifier + '.json')) as f:
                 data = json.load(f)
-                data = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
-                releases.append(Release(version=release_identifier, changes=data))
+                releases.append(ReleaseJsonMapper.from_json(data, release_identifier))
         return releases
 
     def get_last_version(self) -> Optional[str]:

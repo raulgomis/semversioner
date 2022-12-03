@@ -1,3 +1,4 @@
+from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
@@ -42,6 +43,7 @@ class Release:
     """
     version: str
     changes: List[Changeset]
+    created_at: Optional[datetime] = None
 
 
 @dataclass(frozen=True)
