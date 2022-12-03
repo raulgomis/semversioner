@@ -1,5 +1,5 @@
 import dataclasses
-import datetime
+from datetime import datetime
 import json
 import os
 from abc import ABCMeta, abstractmethod
@@ -58,7 +58,7 @@ class ReleaseJsonMapper:
     def to_json(release: Release) -> str:
         data = {
             'version': release.version,
-            'created_at': release.created_at.isoformat(),
+            'created_at': release.created_at.isoformat() if release.created_at else None,
             'changes': release.changes
         }
 
@@ -66,10 +66,10 @@ class ReleaseJsonMapper:
 
     @staticmethod
     def from_json(data: dict, release_identifier: str) -> Release:
-        created_at: datetime = None
+        created_at: Optional[datetime] = None
 
         if 'created_at' in data:  # New format
-            created_at = datetime.datetime.fromisoformat(data['created_at'])
+            created_at = datetime.fromisoformat(data['created_at'])
             version = data['version']
             changes = sorted(data['changes'], key=lambda k: k['type'] + k['description'])  # type: ignore
         else:
@@ -126,7 +126,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
             filename = '{type_name}-{datetime}.json'.format(
                 type_name=change.type,
-                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.datetime.utcnow())
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.utcnow())
             )
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:

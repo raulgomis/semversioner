@@ -5,7 +5,7 @@ from typing import List, Optional
 import click
 from jinja2 import Template
 
-from semversioner.models import (Changeset, MissingChangesetException, Release,
+from semversioner.models import (Changeset, MissingChangesetException, SemversionerException, Release,
                                  ReleaseStatus, ReleaseType)
 from semversioner.storage import SemversionerFileSystemStorage
 
@@ -100,15 +100,17 @@ class Semversioner:
         next_version_number = self.get_next_version()
         changes: List[Changeset] = self.fs.list_changesets()
 
+        if next_version_number is None:
+            raise SemversionerException("Can't calculate next version number.")
+
         click.echo("Releasing version: %s -> %s" % (current_version_number, next_version_number))
 
-        datetime_now = datetime.now(timezone.utc)
-        release = Release(version=next_version_number, changes=changes, created_at=datetime_now)
+        release = Release(version=next_version_number, changes=changes, created_at=datetime.now(timezone.utc))
 
-        self.fs.create_version(release)  # type: ignore[arg-type]
+        self.fs.create_version(release)
         self.fs.remove_all_changesets()
 
-        return release  # type: ignore[arg-type]
+        return release
 
     def get_last_version(self) -> str:
         """ 
