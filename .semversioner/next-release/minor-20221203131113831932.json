@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Add support for storing release datetime in order to display it in the changelog."
-}

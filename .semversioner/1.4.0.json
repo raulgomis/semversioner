@@ -1,0 +1,14 @@
+[
+  {
+    "description": "Add support for storing release datetime in order to display it in the changelog.",
+    "type": "minor"
+  },
+  {
+    "description": "All tests are now able to be run on Windows",
+    "type": "patch"
+  },
+  {
+    "description": "Fix: bug showing incorrect error using release command with no changesets created.",
+    "type": "patch"
+  }
+]

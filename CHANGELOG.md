@@ -1,6 +1,12 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.4.0
+
+- minor: Add support for storing release datetime in order to display it in the changelog.
+- patch: All tests are now able to be run on Windows
+- patch: Fix: bug showing incorrect error using release command with no changesets created.
+
 ## 1.3.0
 
 - minor: Add CLI command to detect missing changeset files before merging to the destination branch.
