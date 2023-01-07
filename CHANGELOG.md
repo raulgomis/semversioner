@@ -1,6 +1,11 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.4.1
+
+- patch: Fixed CVE-2022-40898 in pypa/wheel (development library).
+- patch: Update development dependencies to the latest version.
+
 ## 1.4.0
 
 - minor: Add support for storing release datetime in order to display it in the changelog.

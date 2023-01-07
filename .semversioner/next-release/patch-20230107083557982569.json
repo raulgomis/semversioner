@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Fixed CVE-2022-40898 in pypa/wheel (development library)."
-}
