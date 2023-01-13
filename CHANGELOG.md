@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.5.1
+
+- patch: Fix install packaging module to fix module issues.
+
 ## 1.5.0
 
 - minor: Fix remove StrictVersion deprecation notice by switching to package.version parse method.
