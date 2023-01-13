@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Fix remove StrictVersion deprecation notice by switching to package.version parse method."
-}

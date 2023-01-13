@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Internal: Support python 3.11 in Github actions."
-}

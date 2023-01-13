@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "description": "Fix remove StrictVersion deprecation notice by switching to package.version parse method.",
+      "type": "minor"
+    },
+    {
+      "description": "Internal: Support python 3.11 in Github actions.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2023-01-13T12:34:40.251077+00:00",
+  "version": "1.5.0"
+}
