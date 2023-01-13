@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
+        python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -47,7 +47,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         pip install -r requirements-dev.txt
-        pip install semversioner==0.13.0
+        pip install semversioner==1.4.1
 
         previous_version=$(semversioner current-version)
         semversioner release
