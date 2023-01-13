@@ -43,13 +43,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.7'
     - name: Publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install twine wheel
+        pip install twine==4.0.2
+        pip install wheel==0.38.4
         pip install semversioner==1.5.1
 
         previous_version=$(semversioner current-version)
