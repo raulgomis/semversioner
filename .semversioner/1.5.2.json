@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "description": "Internal: improve CI/CD workflow",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2023-01-13T23:53:45.445135+00:00",
+  "version": "1.5.2"
+}
