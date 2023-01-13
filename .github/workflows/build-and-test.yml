@@ -21,8 +21,7 @@ jobs:
     - name: Lint code
       run: |
         python -m pip install --upgrade pip
-        pip install pytest flake8 mypy
-        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --show-source --statistics
         mypy semversioner tests

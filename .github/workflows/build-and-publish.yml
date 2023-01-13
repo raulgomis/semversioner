@@ -12,9 +12,9 @@ jobs:
       matrix:
         python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -22,7 +22,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
-        pip install -r requirements.txt
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --show-source --statistics
         mypy semversioner tests
@@ -30,15 +29,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
-        pip install -r requirements.txt
         pytest --junitxml="test-reports/test-report.xml"
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: '3.7'
     - name: Publish
@@ -46,7 +44,7 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install -r requirements-dev.txt
+        pip install twine wheel
         pip install semversioner==1.4.1
 
         previous_version=$(semversioner current-version)
