@@ -20,7 +20,7 @@ VERSION = None
 REQUIRED = [
     'click>=8.0.0',
     'jinja2>=3.0.0',
-    'packaging>=23.0'
+    'packaging>=21.0'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
