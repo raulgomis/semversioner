@@ -1,6 +1,11 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 1.7.0
+
+- minor: Validated JSON extension in the  folder.
+- patch: Upgraded development libraries to latest version.
+
 ## 1.6.0
 
 - minor: Decreased packaging minimum version requirements to version 21.0

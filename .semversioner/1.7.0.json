@@ -1,0 +1,14 @@
+{
+  "changes": [
+    {
+      "description": "Validated JSON extension in the  folder.",
+      "type": "minor"
+    },
+    {
+      "description": "Upgraded development libraries to latest version.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2023-07-21T09:25:02.648493+00:00",
+  "version": "1.7.0"
+}
