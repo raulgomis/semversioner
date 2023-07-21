@@ -346,7 +346,7 @@ class CliVersionCommandTest(CommandTest):
         assert __version__.__version__ in result.output
 
 
-class ExistingDataTestCase(unittest.TestCase):
+class LegacyChangesDataTestCase(unittest.TestCase):
     directory_name: str
     changes_dirname: str
     next_release_dirname: str
@@ -360,6 +360,55 @@ class ExistingDataTestCase(unittest.TestCase):
             output.write(fixtures.VERSION_0_1_0)
         with open(os.path.join(self.changes_dirname, "0.2.0.json"), 'x') as output:
             output.write(fixtures.VERSION_0_2_0)
+        print("Created directory: " + self.directory_name)
+
+    def tearDown(self) -> None:
+        print("Removing directory: " + self.directory_name)
+        shutil.rmtree(self.directory_name)
+
+    def test_generate_changelog_single_patch(self) -> None:
+        commands = [
+            ["changelog"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, fixtures.CHANGELOG_5)
+
+    def test_cli_execution_current_version(self) -> None:
+        commands = [
+            ["current-version"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertIn("0.2.0", result.output)
+
+    def test_generate_changelog_add_new_patch(self) -> None:
+        commands = [
+            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["release"],
+            ["changelog"]
+        ]
+
+        result = command_processor(commands, self.directory_name)
+        self.assertEqual(result.output, fixtures.CHANGELOG_6)
+
+
+class ExistingDataTestCase(unittest.TestCase):
+    directory_name: str
+    changes_dirname: str
+    next_release_dirname: str
+
+    def setUp(self) -> None:
+        self.directory_name = tempfile.mkdtemp()
+        self.changes_dirname = os.path.join(self.directory_name, '.semversioner')
+        self.next_release_dirname = os.path.join(self.changes_dirname, 'next-release')
+        os.makedirs(self.next_release_dirname)
+        with open(os.path.join(self.changes_dirname, "0.1.0.json"), 'x') as output:
+            output.write(fixtures.VERSION_0_1_0)
+        with open(os.path.join(self.changes_dirname, "0.2.0.json"), 'x') as output:
+            output.write(fixtures.VERSION_0_2_0)
+        with open(os.path.join(self.next_release_dirname, ".gitignore"), 'w') as output:
+            pass
         print("Created directory: " + self.directory_name)
 
     def tearDown(self) -> None:

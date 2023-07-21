@@ -12,37 +12,66 @@ from semversioner.models import Changeset, Release
 
 
 class SemversionerStorage(metaclass=ABCMeta):
+    """
+    Abstract base class that defines the interface for a storage class in a semversioner system.
+    The storage class is responsible for creating, listing, and managing changesets and versions.
+    """
 
     @abstractmethod
     def is_deprecated(self) -> bool:
+        """
+        Determines if the storage is deprecated.
+        """
         pass
 
     @abstractmethod
     def create_changeset(self, change: Changeset) -> str:
+        """
+        Creates a changeset in the storage.
+        """
         pass
 
     @abstractmethod
     def remove_all_changesets(self) -> None:
+        """
+        Removes all changesets from the storage.
+        """
         pass
 
     @abstractmethod
     def list_changesets(self) -> List[Changeset]:
+        """
+        Retrieves a list of all changesets in the storage.
+        """
         pass
 
     @abstractmethod
     def create_version(self, release: Release) -> None:
+        """
+        Creates a new version in the storage.
+        """
         pass
 
     @abstractmethod
     def list_versions(self) -> List[Release]:
+        """
+        Lists all versions in the storage.
+        """
         pass
 
     @abstractmethod
     def get_last_version(self) -> Optional[str]:
+        """
+        Retrieves the latest version from the storage. Returns None if no versions exist.
+        """
         pass
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
+    """
+    This class extends the built-in json.JSONEncoder class to provide a custom encoding for dataclasses.
+    By default, the json.JSONEncoder class doesn't know how to encode dataclasses, so we define a custom encoding here.
+    """
     def default(self, o):  # type: ignore
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
@@ -51,11 +80,14 @@ class EnhancedJSONEncoder(json.JSONEncoder):
 
 class ReleaseJsonMapper:
     """
-    Release Json Mapper class
+    Provides functionality to convert a Release object to JSON and vice versa.
     """
 
     @staticmethod
     def to_json(release: Release) -> str:
+        """
+        Converts a Release object to a JSON-formatted string.
+        """
         data = {
             'version': release.version,
             'created_at': release.created_at.isoformat() if release.created_at else None,
@@ -66,14 +98,17 @@ class ReleaseJsonMapper:
 
     @staticmethod
     def from_json(data: dict, release_identifier: str) -> Release:
+        """
+        Creates a Release object from a JSON-formatted string.
+        """
         created_at: Optional[datetime] = None
 
         if 'created_at' in data:  # New format
             created_at = datetime.fromisoformat(data['created_at'])
             version = data['version']
-            changes = sorted(data['changes'], key=lambda k: k['type'] + k['description'])  # type: ignore
+            changes = sorted(data['changes'], key=lambda k: k['type'] + k['description'])
         else:
-            changes = sorted(data, key=lambda k: k['type'] + k['description'])  # type: ignore
+            changes = sorted(data, key=lambda k: k['type'] + k['description'])
             version = release_identifier
 
         return Release(version=version, changes=changes, created_at=created_at)
@@ -148,10 +183,11 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         if not os.path.isdir(next_release_dir):
             return changes
         for filename in os.listdir(next_release_dir):
-            full_path = os.path.join(next_release_dir, filename)
-            with open(full_path) as f:
-                dict = json.load(f)
-                changes.append(Changeset(**dict))
+            if filename.endswith('.json'):
+                full_path = os.path.join(next_release_dir, filename)
+                with open(full_path) as f:
+                    dict = json.load(f)
+                    changes.append(Changeset(**dict))
         changes = sorted(changes, key=lambda k: k.type + k.description)
         return changes
 
@@ -171,10 +207,6 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return releases
 
     def get_last_version(self) -> Optional[str]:
-        """ 
-        Gets the current version number. None if there is nothing released yet.
-
-        """
         releases = self._list_release_numbers()
         if len(releases) > 0:
             return releases[0]
