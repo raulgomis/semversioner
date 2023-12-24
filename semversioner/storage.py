@@ -74,7 +74,7 @@ class EnhancedJSONEncoder(json.JSONEncoder):
     """
     def default(self, o):  # type: ignore
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            return dataclasses.asdict(o, dict_factory=lambda x: {k: v for (k, v) in x if v is not None})
         return super().default(o)
 
 
@@ -90,7 +90,7 @@ class ReleaseJsonMapper:
         """
         data = {
             'version': release.version,
-            'created_at': release.created_at.isoformat() if release.created_at else None,
+            'created_at': release.created_at.isoformat(timespec="seconds") if release.created_at else None,
             'changes': release.changes
         }
 
@@ -170,12 +170,17 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return os.path.join(self.next_release_path, filename)
 
     def remove_all_changesets(self) -> None:
-        click.echo("Removing '" + self.next_release_path + "' directory.")
+        click.echo("Removing changeset files in '" + self.next_release_path + "' directory.")
 
+        # Remove all json files in next_release_path
         for filename in os.listdir(self.next_release_path):
-            full_path = os.path.join(self.next_release_path, filename)
-            os.remove(full_path)
-        os.rmdir(self.next_release_path)
+            if filename.endswith('.json'):
+                full_path = os.path.join(self.next_release_path, filename)
+                os.remove(full_path)
+        # Remove next_release_path if the directory is empty
+        if not os.listdir(self.next_release_path):
+            click.echo("Removing '" + self.next_release_path + "' directory.")
+            os.rmdir(self.next_release_path)
 
     def list_changesets(self) -> List[Changeset]:
         changes: List[Changeset] = []

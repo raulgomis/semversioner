@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Change json mapper to use granurality of seconds instead of milliseconds for `created_at` field in releases."
+}
