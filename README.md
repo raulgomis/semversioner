@@ -83,7 +83,27 @@ The template is using [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/), a 
 - {{ change.type }}: {{ change.description }}
 {% endfor %}
 {% endfor %}
+```
 
+Since semversioner `2.0` you can also add custom attributes to the changeset file that will be available in the release template:
+
+```shell
+semversioner add-change --type patch --description "My custom changelog message with attributes." --attributes pr_id=322 --attributes issue_id=123
+```
+
+Then, you can show the attributes in the changelog template. For example:
+
+```
+# Changelog
+Note: version releases in the 0.x.y range may introduce breaking changes.
+{% for release in releases %}
+
+## {{ release.version }} (<DATE>)
+
+{% for change in release.changes %}
+- {{ change.type }}: {{ change.description }}{{ ' (#' + change.attributes.pr_id + ')' if change.attributes }}{{ ' (J' + change.attributes.issue_id + ')' if change.attributes }}
+{% endfor %}
+{% endfor %}
 ```
 
 You can filter the changelog by only showing changes for a specific version:
