@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.1
+
+- patch: Add documentation for custom attributes in the changelog template.
+
 ## 2.0.0
 
 - major: Drop support for Python 3.6 and 3.7 as they are not maintained. Minimum supported version is Python 3.8.

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "description": "Add documentation for custom attributes in the changelog template.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2023-12-24T07:01:45.396263+00:00",
+  "version": "2.0.1"
+}
