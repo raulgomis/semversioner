@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Change deletion logic in `next-release` folder: only delete json files, and delete the folder only if empty. This will allow to keep the `next-release` folder if it contains other files such as `.gitkeep` for example."
-}

@@ -1,6 +1,15 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.0
+
+- major: Drop support for Python 3.6 and 3.7 as they are not maintained. Minimum supported version is Python 3.8.
+- major: Upgrade project third-party dependencies to latest version.
+- minor: Add support for custom properties in changeset files.
+- minor: Change deletion logic in `next-release` folder: only delete json files, and delete the folder only if empty. This will allow to keep the `next-release` folder if it contains other files such as `.gitkeep` for example.
+- minor: Change json mapper to use granurality of seconds instead of milliseconds for `created_at` field in releases.
+- patch: Clean up README Markdown syntax.
+
 ## 1.7.0
 
 - minor: Validated JSON extension in the  folder.

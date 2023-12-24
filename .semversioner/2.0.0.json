@@ -1,0 +1,30 @@
+{
+  "changes": [
+    {
+      "description": "Drop support for Python 3.6 and 3.7 as they are not maintained. Minimum supported version is Python 3.8.",
+      "type": "major"
+    },
+    {
+      "description": "Upgrade project third-party dependencies to latest version.",
+      "type": "major"
+    },
+    {
+      "description": "Add support for custom properties in changeset files.",
+      "type": "minor"
+    },
+    {
+      "description": "Change deletion logic in `next-release` folder: only delete json files, and delete the folder only if empty. This will allow to keep the `next-release` folder if it contains other files such as `.gitkeep` for example.",
+      "type": "minor"
+    },
+    {
+      "description": "Change json mapper to use granurality of seconds instead of milliseconds for `created_at` field in releases.",
+      "type": "minor"
+    },
+    {
+      "description": "Clean up README Markdown syntax.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2023-12-24T06:42:04.630029+00:00",
+  "version": "2.0.0"
+}
