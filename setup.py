@@ -15,7 +15,7 @@ DESCRIPTION = 'Manage properly semver in your repository'
 URL = 'https://github.com/raulgomis/semversioner'
 EMAIL = 'raulgomis@gmail.com'
 AUTHOR = 'Raul Gomis'
-REQUIRES_PYTHON = '>=3.7.0'
+REQUIRES_PYTHON = '>=3.8.0'
 VERSION = None
 REQUIRED = [
     'click>=8.0.0',
@@ -85,7 +85,7 @@ setup(
     install_requires=REQUIRED,
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         'Environment :: Console',
 
@@ -96,10 +96,11 @@ setup(
 
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Operating System :: OS Independent',
     ],
 

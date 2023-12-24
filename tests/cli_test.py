@@ -34,7 +34,8 @@ def single_command_processor(command: List[str], path: str) -> Result:
 
 
 def get_file(filename: str) -> Path: 
-    return files('tests.resources').joinpath(filename)  # type: ignore
+    path: Path = files('tests.resources').joinpath(filename)
+    return path
 
 
 def read_file(filename: str) -> str:
