@@ -1,7 +1,7 @@
 from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 class SemversionerException(Exception):
@@ -34,7 +34,7 @@ class Changeset:
     """
     type: str
     description: str
-    attributes: dict = None
+    attributes: Optional[Dict[str, str]] = None
 
 
 @dataclass(frozen=True)

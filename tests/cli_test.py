@@ -40,31 +40,32 @@ def get_file(filename: str) -> Path:
 def read_file(filename: str) -> str:
     return files('tests.resources').joinpath(filename).read_text()  # type: ignore
 
+
 class TestUtilsParseKeyValue(unittest.TestCase):
 
-    def test_empty_input(self):
+    def test_empty_input(self) -> None:
         # Test case 1: Empty input
-        assert parse_key_value_pair(None, None, ()) is None
+        assert parse_key_value_pair(None, None, []) is None
 
-    def test_single_key_value_pair(self):
+    def test_single_key_value_pair(self) -> None:
         # Test case 2: Single key-value pair
         input1 = ['key1=value1']
         expected_output1 = {'key1': 'value1'}
         assert parse_key_value_pair(None, None, input1) == expected_output1
 
-    def test_multiple_key_value_pairs(self):
+    def test_multiple_key_value_pairs(self) -> None:
         # Test case 3: Multiple key-value pairs
         input2 = ['key1=value1', 'key2=value2', 'key3=value3']
         expected_output2 = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3'}
         assert parse_key_value_pair(None, None, input2) == expected_output2
 
-    def test_special_characters_in_key_value_pairs(self):
+    def test_special_characters_in_key_value_pairs(self) -> None:
         # Test case 4: Key-value pairs with special characters
         input3 = ['key1=value1', 'key2=value2', 'key3=value3', 'key4=1+2=3=3']
         expected_output3 = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3', 'key4': '1+2=3=3'}
         assert parse_key_value_pair(None, None, input3) == expected_output3
 
-    def test_empty_values_in_key_value_pairs(self):
+    def test_empty_values_in_key_value_pairs(self) -> None:
         # Test case 5: Key-value pairs with empty values
         input4 = ['key1=', 'key2=value2', 'key3=']
         expected_output4 = {'key1': '', 'key2': 'value2', 'key3': ''}

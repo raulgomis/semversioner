@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import click
 from jinja2 import Template
@@ -33,7 +33,7 @@ class Semversioner:
     def is_deprecated(self) -> bool:
         return self.fs.is_deprecated()
 
-    def add_change(self, change_type: str, description: str, attributes: dict = None) -> str:
+    def add_change(self, change_type: str, description: str, attributes: Optional[Dict[str, str]] = None) -> str:
         """ 
         Create a new changeset file.
 

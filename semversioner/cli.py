@@ -31,7 +31,7 @@ Usage
 
 import os
 import sys
-from typing import Optional, TextIO
+from typing import Dict, List, Optional, TextIO
 
 import click
 
@@ -41,7 +41,8 @@ from semversioner.models import (MissingChangesetException, Release, ReleaseStat
 
 ROOTDIR = os.getcwd()
 
-def parse_key_value_pair(ctx, param, value):
+
+def parse_key_value_pair(ctx: Optional[click.core.Context], param: Optional[click.core.Parameter], value: List[str]) -> Optional[Dict[str, str]]:
     """
     Parses a list of strings into a dictionary where each string is a key-value pair.
     """
@@ -52,6 +53,7 @@ def parse_key_value_pair(ctx, param, value):
         key, val = item.split('=', 1)
         dict_value[key] = val
     return dict_value
+
 
 @click.group()
 @click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.", type=click.Path(exists=True))
