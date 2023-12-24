@@ -1,16 +1,19 @@
 # Semversioner
-The easiest way to manage [semantic versioning](https://semver.org/) in your project and generate CHANGELOG.md file automatically. 
 
-Semversioner will provide the tooling to automate semver release process for libraries, docker images, etc. 
+The easiest way to manage [semantic versioning](https://semver.org/) in your project and generate CHANGELOG.md file automatically.
+
+Semversioner will provide the tooling to automate semver release process for libraries, docker images, etc.
 
 This project was inspired by the way AWS manages their versioning for [AWS-cli](https://github.com/aws/aws-cli/).
 
 ## Semantic Versioning
+
 The [semantic versioning](https://semver.org/) spec involves several possible variations, but to simplify, in _Semversioner_ we are using the three-part version number:
 
 `<major>.<minor>.<patch>`
 
 Constructed with the following guidelines:
+
 - Breaking backward compatibility or major features bumps the major (and resets the minor and patch).
 - New additions without breaking backward compatibility bumps the minor (and resets the patch).
 - Bug fixes and misc changes bumps the patch.
@@ -35,7 +38,7 @@ JSON file is a list of all the individual JSON files from ``next-release``.
 ## Install
 
 ```shell
-$ pip install semversioner
+pip install semversioner
 ```
 
 ## Usage
@@ -43,13 +46,15 @@ $ pip install semversioner
 ### Bumping the version
 
 In your local environment your will use the CLI to create the different changeset files that will be committed with your code. For example:
+
 ```shell
-$ semversioner add-change --type patch --description "Fix security vulnerability with authentication."
+semversioner add-change --type patch --description "Fix security vulnerability with authentication."
 ```
 
-Then, in your CI/CD tool you will need to release (generating automatically version number) and creating the the changelog file. 
+Then, in your CI/CD tool you will need to release (generating automatically version number) and creating the the changelog file.
+
 ```shell
-$ semversioner release
+semversioner release
 ```
 
 ### Generating Changelog
@@ -57,13 +62,13 @@ $ semversioner release
 As a part of your CI/CD workflow, you will be able to generate the changelog file with all changes.
 
 ```shell
-$ semversioner changelog > CHANGELOG.md
+semversioner changelog > CHANGELOG.md
 ```
 
 You can customize the changelog by creating a template and passing it as parameter to the command. For example:
 
 ```shell
-$ semversioner changelog --template .semversioner/config/template.j2
+semversioner changelog --template .semversioner/config/template.j2
 ```
 
 The template is using [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/), a templating language for Python. For example:
@@ -84,27 +89,28 @@ The template is using [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/), a 
 You can filter the changelog by only showing changes for a specific version:
 
 ```shell
-$ semversioner changelog --version "1.0.0"
+semversioner changelog --version "1.0.0"
 ```
 
 Alternatively, you can use the following command to filter changes by the last released version:
 
 ```shell
-$ semversioner changelog --version $(semversioner current-version)
+semversioner changelog --version $(semversioner current-version)
 ```
+
 ### Getting next version
 
-As part of the CI/CD workflow, sometimes you want to release dev, rc, or other pre-release packages. For this purpose, 
+As part of the CI/CD workflow, sometimes you want to release dev, rc, or other pre-release packages. For this purpose,
 the next-version command can be issued, to compute the next version based on the current change set. This will
 not change any files on disk, and they are as such preserved for any future release.
 
 ```shell
-$ semversioner next-version
+semversioner next-version
 ```
 
-
 ## License
-Copyright (c) 2021 Raul Gomis.
+
+Copyright (c) 2023 Raul Gomis.
 MIT licensed, see [LICENSE](LICENSE) file.
 
 ---

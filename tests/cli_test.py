@@ -11,7 +11,7 @@ from click.testing import CliRunner, Result
 from importlib_resources import files
 
 from semversioner import __version__
-from semversioner.cli import cli
+from semversioner.cli import cli, parse_key_value_pair
 from tests import fixtures
 
 
@@ -40,6 +40,37 @@ def get_file(filename: str) -> Path:
 
 def read_file(filename: str) -> str:
     return files('tests.resources').joinpath(filename).read_text()  # type: ignore
+
+
+class TestUtilsParseKeyValue(unittest.TestCase):
+
+    def test_empty_input(self) -> None:
+        # Test case 1: Empty input
+        assert parse_key_value_pair(None, None, []) is None
+
+    def test_single_key_value_pair(self) -> None:
+        # Test case 2: Single key-value pair
+        input1 = ['key1=value1']
+        expected_output1 = {'key1': 'value1'}
+        assert parse_key_value_pair(None, None, input1) == expected_output1
+
+    def test_multiple_key_value_pairs(self) -> None:
+        # Test case 3: Multiple key-value pairs
+        input2 = ['key1=value1', 'key2=value2', 'key3=value3']
+        expected_output2 = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3'}
+        assert parse_key_value_pair(None, None, input2) == expected_output2
+
+    def test_special_characters_in_key_value_pairs(self) -> None:
+        # Test case 4: Key-value pairs with special characters
+        input3 = ['key1=value1', 'key2=value2', 'key3=value3', 'key4=1+2=3=3']
+        expected_output3 = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3', 'key4': '1+2=3=3'}
+        assert parse_key_value_pair(None, None, input3) == expected_output3
+
+    def test_empty_values_in_key_value_pairs(self) -> None:
+        # Test case 5: Key-value pairs with empty values
+        input4 = ['key1=', 'key2=value2', 'key3=']
+        expected_output4 = {'key1': '', 'key2': 'value2', 'key3': ''}
+        assert parse_key_value_pair(None, None, input4) == expected_output4
 
 
 class CommandTest(unittest.TestCase):
@@ -200,7 +231,7 @@ class ChangelogCommandTest(CommandTest):
             ["release"],
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
-            ["add-change", "--type", "patch", "--description", "This is my patch description"],
+            ["add-change", "--type", "patch", "--description", "This is my patch description", "--attributes", "pr_id=322", "--attributes", "issue_id=123"],
             ["release"],
             ["changelog"]
         ]
@@ -219,6 +250,12 @@ class ChangelogCommandTest(CommandTest):
         ], self.directory_name)
 
         self.assertEqual(result.output, read_file("template_02_readme.md"))
+
+        result = command_processor([
+            ["changelog", "--template", str(get_file("template_03.j2"))]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, read_file("template_03_readme.md"))
 
         result = command_processor([
             ["changelog"]

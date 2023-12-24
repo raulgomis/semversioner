@@ -74,7 +74,7 @@ class EnhancedJSONEncoder(json.JSONEncoder):
     """
     def default(self, o):  # type: ignore
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            return dataclasses.asdict(o, dict_factory=lambda x: {k: v for (k, v) in x if v is not None})
         return super().default(o)
 
 
@@ -90,7 +90,7 @@ class ReleaseJsonMapper:
         """
         data = {
             'version': release.version,
-            'created_at': release.created_at.isoformat() if release.created_at else None,
+            'created_at': release.created_at.isoformat(timespec="seconds") if release.created_at else None,
             'changes': release.changes
         }
 

@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import click
 from jinja2 import Template
@@ -33,7 +33,7 @@ class Semversioner:
     def is_deprecated(self) -> bool:
         return self.fs.is_deprecated()
 
-    def add_change(self, change_type: str, description: str) -> str:
+    def add_change(self, change_type: str, description: str, attributes: Optional[Dict[str, str]] = None) -> str:
         """ 
         Create a new changeset file.
 
@@ -44,6 +44,7 @@ class Semversioner:
         -------
         change_type (str): Change type. Allowed values: major, minor, patch.
         description (str): Change description.
+        attributes (dict): Change attributes (Optional).
 
         Returns
         -------
@@ -51,7 +52,7 @@ class Semversioner:
             Absolute path of the file generated.
         """
 
-        return self.fs.create_changeset(Changeset(type=change_type, description=description))
+        return self.fs.create_changeset(Changeset(type=change_type, description=description, attributes=attributes))
 
     def generate_changelog(self, version: Optional[str] = None, template: str = DEFAULT_TEMPLATE) -> str:
         """ 
