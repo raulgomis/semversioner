@@ -39,8 +39,7 @@ def get_file(filename: str) -> Path:
 
 
 def read_file(filename: str) -> str:
-    text: str = files('email.tests.data').joinpath('message.eml').read_text()
-    return text
+    return files('tests.resources').joinpath(filename).read_text()  # type: ignore
 
 
 class CommandTest(unittest.TestCase):

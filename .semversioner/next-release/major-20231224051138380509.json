@@ -1,0 +1,4 @@
+{
+  "type": "major",
+  "description": "Upgrade project third-party dependencies to latest version."
+}
