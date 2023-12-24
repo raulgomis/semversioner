@@ -59,6 +59,21 @@ class CoreTestCase(unittest.TestCase):
         with self.assertRaises(MissingChangesetException):
             releaser.release()
 
+    def test_release_with_attributes(self) -> None:
+    
+            releaser = Semversioner(path=self.directory_name)
+
+            releaser.add_change("minor", "My description", attributes={"key": "value"})
+            releaser.add_change("major", "My description", attributes={"key2": "value2", "key3": "value3"})
+            self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version='1.0.0', unreleased_changes=[
+                Changeset(type='major', description='My description', attributes={"key2": "value2", "key3": "value3"}),
+                Changeset(type='minor', description='My description', attributes={"key": "value"})]
+            ))
+            releaser.release()
+            self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
+            with self.assertRaises(MissingChangesetException):
+                releaser.release()
+
     def test_release_stress(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)

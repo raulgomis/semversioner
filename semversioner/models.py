@@ -34,6 +34,7 @@ class Changeset:
     """
     type: str
     description: str
+    attributes: dict = None
 
 
 @dataclass(frozen=True)

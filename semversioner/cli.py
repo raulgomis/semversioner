@@ -41,6 +41,17 @@ from semversioner.models import (MissingChangesetException, Release, ReleaseStat
 
 ROOTDIR = os.getcwd()
 
+def parse_key_value_pair(ctx, param, value):
+    """
+    Parses a list of strings into a dictionary where each string is a key-value pair.
+    """
+    if not value:
+        return None
+    dict_value = {}
+    for item in value:
+        key, val = item.split('=', 1)
+        dict_value[key] = val
+    return dict_value
 
 @click.group()
 @click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.", type=click.Path(exists=True))
@@ -84,9 +95,10 @@ def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) 
 @click.pass_context
 @click.option('--type', '-t', type=click.Choice(['major', 'minor', 'patch']), required=True)
 @click.option('--description', '-d', required=True)
-def cli_add_change(ctx: click.Context, type: str, description: str) -> None:
+@click.option('--attributes', multiple=True, callback=parse_key_value_pair, help='Attributes in key=value format.')
+def cli_add_change(ctx: click.Context, type: str, description: str, attributes: Optional[dict]) -> None:
     releaser: Semversioner = ctx.obj['releaser']
-    path: str = releaser.add_change(type, description)
+    path: str = releaser.add_change(type, description, attributes)
     click.echo(message="Successfully created file " + path)
 
 
