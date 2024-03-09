@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.2
+
+- patch: Bump jinja2 from 3.1.2 to 3.1.3 to fix CVE-2024-22195.
+
 ## 2.0.1
 
 - patch: Add documentation for custom attributes in the changelog template.
