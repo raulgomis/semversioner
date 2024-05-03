@@ -1,9 +1,9 @@
-name: Build and Test (branches)
+name: Build and Test
 on:
   push:
-    branches:    
-      - 'feature/*'
-      - 'fix/*'
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   build:
@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12']
+        poetry-version: ['1.8.2']
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -18,16 +19,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - name: Lint code
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --show-source --statistics
-        mypy semversioner tests
-    - name: Build and test
-      run: |
-        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+    - name: Install Poetry ${{ matrix.poetry-version }}
+      uses: abatilo/actions-poetry@v3.0.0
+      with:
+        poetry-version: ${{ matrix.poetry-version }}
+    - name: Lint
+      run: poetry run poe lint
+    - name: Test
+      run: poetry run poe test --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+    - name: Build
+      run: poetry build
     - name: Upload pytest test results
       uses: actions/upload-artifact@v3
       with:
