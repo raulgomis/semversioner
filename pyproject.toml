@@ -42,7 +42,7 @@ test = "python -m pytest"
 clean = "rm -vrf .mypy_cache .pytest_cache __pycache__/*"
 
 [[tool.poe.tasks.release]]
-sequence = ['_semversioner_release', 'semversioner_changelog', '_semversioner_update_toml_version']
+sequence = ['_semversioner_release', '_semversioner_changelog', '_semversioner_update_toml_version']
 ignore_fail = 'return_non_zero'
 
 [[tool.poe.tasks.lint]]
