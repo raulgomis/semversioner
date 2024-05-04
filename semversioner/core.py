@@ -96,7 +96,7 @@ class Semversioner:
         MissingChangesetException: SemversionerException
         """
 
-        if not self._is_changeset_available():
+        if not self.has_changesets():
             raise MissingChangesetException()
 
         current_version_number = self.get_last_version()
@@ -159,7 +159,7 @@ class Semversioner:
 
         return len(impacted_files) == 0 or len(semver_documents) > 0
 
-    def _is_changeset_available(self) -> bool:
+    def has_changesets(self) -> bool:
         """
         Returns True if there are changeset files defined.
         """
