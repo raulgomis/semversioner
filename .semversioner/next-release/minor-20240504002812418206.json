@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "update the  command to work across multiple branches and changes."
+}

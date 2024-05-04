@@ -93,24 +93,23 @@ class CoreTestCase(unittest.TestCase):
         self.assertFalse(releaser.is_deprecated())
 
     def test_check_nok(self) -> None:
-
         releaser = Semversioner(path=self.directory_name)
-        self.assertFalse(releaser.check())
+        self.assertFalse(releaser.check("**/*", "master"))
 
     def test_check_ok(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
 
-        self.assertFalse(releaser.check())
+        self.assertFalse(releaser.check("**/*", "master"))
         releaser.add_change("major", "My description")
-        self.assertTrue(releaser.check())
+        self.assertTrue(releaser.check("**/*", "master"))
 
     def test_check_after_release(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
         releaser.add_change("major", "My description")
         releaser.release()
-        self.assertFalse(releaser.check())
+        self.assertFalse(releaser.check("**/*", "master"))
 
 
 if __name__ == '__main__':
