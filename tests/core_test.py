@@ -92,24 +92,25 @@ class CoreTestCase(unittest.TestCase):
         releaser = Semversioner(self.directory_name)
         self.assertFalse(releaser.is_deprecated())
 
-    def test_has_changesets_nok(self) -> None:
-        releaser = Semversioner(path=self.directory_name)
-        self.assertFalse(releaser.has_changesets())
-
-    def test_has_changesets_ok(self) -> None:
+    def test_check_nok(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
+        self.assertFalse(releaser.check())
 
-        self.assertFalse(releaser.has_changesets())
+    def test_check_ok(self) -> None:
+
+        releaser = Semversioner(path=self.directory_name)
+
+        self.assertFalse(releaser.check())
         releaser.add_change("major", "My description")
-        self.assertTrue(releaser.has_changesets())
+        self.assertTrue(releaser.check())
 
-    def test_has_changesets_after_release(self) -> None:
+    def test_check_after_release(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
         releaser.add_change("major", "My description")
         releaser.release()
-        self.assertFalse(releaser.has_changesets())
+        self.assertFalse(releaser.check())
 
 
 if __name__ == '__main__':
