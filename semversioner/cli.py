@@ -149,12 +149,3 @@ def cli_check(ctx: click.Context) -> None:
         sys.exit(-1)
     else:
         click.echo('OK')
-
-
-def main() -> None:
-    # pylint: disable=no-value-for-parameter
-    cli()
-
-
-if __name__ == '__main__':
-    main()
