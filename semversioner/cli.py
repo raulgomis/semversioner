@@ -141,10 +141,12 @@ def status(ctx: click.Context) -> None:
 
 
 @cli.command('check', help="Verifies changeset files exist.")
+@click.option('--src', '-s', required=False, default="**/*", help="A glob pattern for the source directory. Any changes here require semver impact. default=\"**/*\"")
+@click.option('--base', '-b', required=False, default="master", help="The base branch to compare against. default=master.")
 @click.pass_context
-def cli_check(ctx: click.Context) -> None:
+def cli_check(ctx: click.Context, src: str, base: str) -> None:
     releaser: Semversioner = ctx.obj['releaser']
-    if not releaser.check():
+    if not releaser.check(src, base):
         click.secho("Error: No changes to release.", fg='red')
         sys.exit(-1)
     else:
