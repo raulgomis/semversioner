@@ -5,6 +5,8 @@ description = "Properly manage semver in your repository"
 authors = ["Raul Gomis <raulgomis@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/raulgomis/semversioner"
+
 # The licence and python version classifiers are automatically included by Poetry
 classifiers = [
     'Development Status :: 5 - Production/Stable',
