@@ -6,13 +6,14 @@ on:
     branches: [master]
   workflow_call:
 
+env:
+  POETRY_VERSION: 1.8.2
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        poetry-version: ['1.8.2']
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -20,10 +21,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - name: Install Poetry ${{ matrix.poetry-version }}
+    - name: Install Poetry ${{ env.POETRY_VERSION }}
       uses: abatilo/actions-poetry@v3.0.0
       with:
-        poetry-version: ${{ matrix.poetry-version }}
+        poetry-version: ${{ env.POETRY_VERSION }}
     - name: Lint
       run: poetry run poe lint
     - name: Test
