@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "move main logic into __main__.py"
+}
