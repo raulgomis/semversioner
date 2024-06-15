@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.5
+
+- patch: move main logic into __main__.py
+
 ## 2.0.4
 
 - patch: Include CHANGELOG.md into package.
