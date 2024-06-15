@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.4
+
+- patch: Include CHANGELOG.md into package.
+
 ## 2.0.3
 
 - patch: Bump jinja2 from 3.1.3 to 3.1.4 to patch CVE-2024-34064.
