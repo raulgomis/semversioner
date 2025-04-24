@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.6
+
+- patch: Bump jinja2 from 3.1.4 to 3.1.6.
+
 ## 2.0.5
 
 - patch: move main logic into __main__.py
