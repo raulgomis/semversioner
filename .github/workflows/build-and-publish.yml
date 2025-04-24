@@ -49,9 +49,9 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install twine==4.0.2
-        pip install wheel==0.42.0
-        pip install semversioner==1.7.0
+        pip install twine==6.1.0
+        pip install wheel==0.45.1
+        pip install semversioner==2.0.3
 
         previous_version=$(semversioner current-version)
         semversioner release
