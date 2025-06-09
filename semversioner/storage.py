@@ -157,6 +157,11 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
+        # The directory might have been removed after a previous release when
+        # using the API directly. Ensure it exists before creating the file.
+        if not os.path.isdir(self.next_release_path):
+            os.makedirs(self.next_release_path)
+
         filename = None
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
             filename = '{type_name}-{datetime}.json'.format(

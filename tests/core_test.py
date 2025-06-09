@@ -112,6 +112,17 @@ class CoreTestCase(unittest.TestCase):
         releaser.release()
         self.assertFalse(releaser.check())
 
+    def test_add_change_after_release_same_instance(self) -> None:
+        """Ensure add_change works after a release using the same object."""
+
+        releaser = Semversioner(path=self.directory_name)
+        releaser.add_change("minor", "First")
+        releaser.release()
+
+        # Directory is removed during release but add_change should recreate it
+        path = releaser.add_change("patch", "Second")
+        self.assertTrue(os.path.isfile(path))
+
 
 if __name__ == '__main__':
     unittest.main()
