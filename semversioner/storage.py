@@ -1,5 +1,5 @@
 import dataclasses
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 from abc import ABCMeta, abstractmethod
@@ -161,7 +161,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
             filename = '{type_name}-{datetime}.json'.format(
                 type_name=change.type,
-                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.utcnow())
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.now(timezone.utc))
             )
 
         with open(os.path.join(self.next_release_path, filename), 'w') as f:
