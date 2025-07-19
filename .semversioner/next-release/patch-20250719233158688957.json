@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Fix deprecated datetime.utcnow() usage by replacing with datetime.now(timezone.utc) for Python 3.12+ compatibility"
-}
