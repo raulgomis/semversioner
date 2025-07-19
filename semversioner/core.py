@@ -130,7 +130,11 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
-        release_type: str = sorted(list(map(lambda x: x.type, changes)))[0]
+        # Determine the highest priority change type
+        # Priority order: major > minor > patch
+        release_type_priority = {'major': 3, 'minor': 2, 'patch': 1}
+        change_types = [change.type for change in changes]
+        release_type: str = max(change_types, key=lambda x: release_type_priority.get(x, 0))
         next_version: str = self._get_next_version_from_type(current_version_number, release_type)
         return next_version
 

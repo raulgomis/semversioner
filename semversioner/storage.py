@@ -1,5 +1,5 @@
 import dataclasses
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 from abc import ABCMeta, abstractmethod
@@ -157,17 +157,29 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        filename = None
-        while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
+        # Ensure the next-release directory exists
+        if not os.path.isdir(self.next_release_path):
+            os.makedirs(self.next_release_path)
+
+        # Use atomic file creation to avoid race conditions
+        while True:
             filename = '{type_name}-{datetime}.json'.format(
                 type_name=change.type,
-                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.utcnow())
+                datetime="{:%Y%m%d%H%M%S%f}".format(datetime.now(timezone.utc))
             )
+            full_path = os.path.join(self.next_release_path, filename)
 
-        with open(os.path.join(self.next_release_path, filename), 'w') as f:
-            f.write(json.dumps(change, cls=EnhancedJSONEncoder, indent=2) + "\n")
+            try:
+                # Use exclusive creation mode to avoid race conditions
+                # This will fail if the file already exists
+                with open(full_path, 'x') as f:
+                    f.write(json.dumps(change, cls=EnhancedJSONEncoder, indent=2) + "\n")
+                break
+            except FileExistsError:
+                # File already exists, try again with a new timestamp
+                continue
 
-        return os.path.join(self.next_release_path, filename)
+        return full_path
 
     def remove_all_changesets(self) -> None:
         click.echo("Removing changeset files in '" + self.next_release_path + "' directory.")
