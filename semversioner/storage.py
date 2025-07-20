@@ -157,9 +157,6 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        # Ensure the next-release directory exists
-        os.makedirs(self.next_release_path, exist_ok=True)
-
         # Retry loop with atomic file creation to prevent race conditions
         while True:
             filename = '{type_name}-{datetime}.json'.format(
