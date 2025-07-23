@@ -157,17 +157,22 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
-        filename = None
-        while (filename is None or os.path.isfile(os.path.join(self.next_release_path, filename))):
+        # Retry loop with atomic file creation to prevent race conditions
+        while True:
             filename = '{type_name}-{datetime}.json'.format(
                 type_name=change.type,
                 datetime="{:%Y%m%d%H%M%S%f}".format(datetime.now(timezone.utc))
             )
+            full_path = os.path.join(self.next_release_path, filename)
 
-        with open(os.path.join(self.next_release_path, filename), 'w') as f:
-            f.write(json.dumps(change, cls=EnhancedJSONEncoder, indent=2) + "\n")
-
-        return os.path.join(self.next_release_path, filename)
+            try:
+                # Use 'x' mode for exclusive creation - fails if file already exists
+                with open(full_path, 'x') as f:
+                    f.write(json.dumps(change, cls=EnhancedJSONEncoder, indent=2) + "\n")
+                return full_path
+            except FileExistsError:
+                # File already exists, retry with a new timestamp
+                continue
 
     def remove_all_changesets(self) -> None:
         click.echo("Removing changeset files in '" + self.next_release_path + "' directory.")
