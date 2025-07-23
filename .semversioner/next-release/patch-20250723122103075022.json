@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Add test for changeset file creation race condition"
+}
