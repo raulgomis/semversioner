@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.0.8
+
+- patch: Fix file creation race condition
+
 ## 2.0.7
 
 - patch: Fix deprecated datetime.utcnow() usage by replacing with datetime.now(timezone.utc) for Python 3.12+ compatibility
