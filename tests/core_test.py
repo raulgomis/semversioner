@@ -2,6 +2,7 @@ import unittest
 import shutil
 import os
 import tempfile
+import threading
 
 from semversioner import Semversioner
 from semversioner import ReleaseStatus
@@ -87,6 +88,39 @@ class CoreTestCase(unittest.TestCase):
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version='1.0.0', unreleased_changes=expected))
         releaser.release()
         self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
+
+    def test_concurrent_changeset_creation_race_condition(self) -> None:
+        """
+        Test that concurrent changeset creation does not result in file creation race conditions.
+        """
+        releaser = Semversioner(self.directory_name)
+        num_threads = 20
+        threads = []
+        descriptions = [f"desc {i}" for i in range(num_threads)]
+
+        def add_change(desc):
+            releaser.add_change("patch", desc)
+
+        for desc in descriptions:
+            t = threading.Thread(target=add_change, args=(desc,))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        # Check that all changeset files were created and are unique
+        files = [f for f in os.listdir(self.next_release_dirname) if f.endswith('.json')]
+        self.assertEqual(len(files), num_threads)
+        # Optionally, check that all descriptions are present
+        found_descriptions = set()
+        for f in files:
+            with open(os.path.join(self.next_release_dirname, f)) as fh:
+                data = fh.read()
+                for desc in descriptions:
+                    if desc in data:
+                        found_descriptions.add(desc)
+        self.assertEqual(set(descriptions), found_descriptions)
 
     def test_is_deprecated(self) -> None:
         releaser = Semversioner(self.directory_name)
