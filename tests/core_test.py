@@ -98,7 +98,8 @@ class CoreTestCase(unittest.TestCase):
         threads = []
         descriptions = [f"desc {i}" for i in range(num_threads)]
 
-        def add_change(desc):
+        def add_change(desc: str) -> None:
+            # Each thread tries to add a changeset with a unique description
             releaser.add_change("patch", desc)
 
         for desc in descriptions:

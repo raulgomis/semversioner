@@ -164,7 +164,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
                 datetime="{:%Y%m%d%H%M%S%f}".format(datetime.now(timezone.utc))
             )
             full_path = os.path.join(self.next_release_path, filename)
-            
+
             try:
                 # Use 'x' mode for exclusive creation - fails if file already exists
                 with open(full_path, 'x') as f:
