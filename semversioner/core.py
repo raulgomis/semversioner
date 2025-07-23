@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+import fnmatch
 
 import click
 from jinja2 import Template
@@ -8,6 +9,7 @@ from jinja2 import Template
 from semversioner.models import (Changeset, MissingChangesetException, SemversionerException, Release,
                                  ReleaseStatus, ReleaseType)
 from semversioner.storage import SemversionerFileSystemStorage
+import subprocess
 
 ROOTDIR = os.getcwd()
 INITIAL_VERSION = '0.0.0'
@@ -94,7 +96,7 @@ class Semversioner:
         MissingChangesetException: SemversionerException
         """
 
-        if not self.check():
+        if not self.has_changesets():
             raise MissingChangesetException()
 
         current_version_number = self.get_last_version()
@@ -144,10 +146,22 @@ class Semversioner:
 
         return ReleaseStatus(version=version, next_version=next_version, unreleased_changes=changes)
 
-    def check(self) -> bool:
+    def check(self, src: str, base: str) -> bool:
         """
-        Check if changeset files are present.
+        Check if changeset files are present in the current branch.
         This is useful to enforce that changeset files are present before merging PRs to the target branch.
+        """
+        command = ["git", "diff", "--name-only", base]
+        output = subprocess.check_output(command, cwd=self.fs.path).decode().strip()
+        changed_files: List[str] = output.splitlines()
+        impacted_files = [f for f in changed_files if fnmatch.fnmatch(f, src)]
+        semver_documents = [f for f in changed_files if f.startswith(".semversioner/next-release/")]
+
+        return len(impacted_files) == 0 or len(semver_documents) > 0
+
+    def has_changesets(self) -> bool:
+        """
+        Returns True if there are changeset files defined.
         """
         changes: List[Changeset] = self.fs.list_changesets()
         return len(changes) > 0
