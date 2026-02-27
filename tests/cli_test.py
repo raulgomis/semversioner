@@ -258,6 +258,18 @@ class ChangelogCommandTest(CommandTest):
         self.assertEqual(result.output, read_file("template_03_readme.md"))
 
         result = command_processor([
+            ["changelog", "--template", str(get_file("template_04.j2"))]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, read_file("template_04_readme.md"))
+
+        result = command_processor([
+            ["changelog", "--version", "1.0.0", "--template", str(get_file("template_04.j2"))]
+        ], self.directory_name)
+
+        self.assertEqual(result.output, fixtures.CHANGELOG_4_TEMPLATE_CURRENT_VERSION_PARTIAL)
+
+        result = command_processor([
             ["changelog"]
         ], self.directory_name)
 

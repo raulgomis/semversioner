@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Expose current_version to changelog templates."
+}

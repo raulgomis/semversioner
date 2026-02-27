@@ -96,6 +96,9 @@ Then, you can show the attributes in the changelog template. For example:
 ```
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
+
+# Current version: {{ current_version }}
+
 {% for release in releases %}
 
 ## {{ release.version }} (<DATE>)

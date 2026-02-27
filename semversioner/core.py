@@ -71,7 +71,11 @@ class Semversioner:
         if version is not None:
             releases = [x for x in releases if x.version == version]
 
-        return Template(template, trim_blocks=True).render(releases=releases)
+        current_version = self.get_last_version()
+        return Template(template, trim_blocks=True).render(
+            releases=releases,
+            current_version=current_version,
+        )
 
     def release(self) -> Release:
         """ 
