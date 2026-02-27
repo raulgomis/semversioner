@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.1.0
+
+- minor: Expose current_version to changelog templates.
+
 ## 2.0.8
 
 - patch: Fix file creation race condition
