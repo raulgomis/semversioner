@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.1.1
+
+- patch: Add Python 3.14 to supported versions and CI test matrix
+
 ## 2.1.0
 
 - minor: Expose current_version to changelog templates.

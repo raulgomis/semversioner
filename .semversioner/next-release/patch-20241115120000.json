@@ -1,4 +1,0 @@
-{
-  "description": "Add Python 3.14 to supported versions and CI test matrix",
-  "type": "patch"
-}
