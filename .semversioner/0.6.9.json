@@ -1,6 +1,6 @@
 [
   {
-    "description": "Fix packaging",
+    "description": "Fix packaging.",
     "type": "patch"
   }
 ]

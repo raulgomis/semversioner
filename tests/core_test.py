@@ -79,9 +79,7 @@ def test_release_with_attributes(directory_name: str) -> None:
         version="0.0.0",
         next_version="1.0.0",
         unreleased_changes=[
-            Changeset(
-                type="major", description="My description", attributes={"key2": "value2", "key3": "value3"}
-            ),
+            Changeset(type="major", description="My description", attributes={"key2": "value2", "key3": "value3"}),
             Changeset(type="minor", description="My description", attributes={"key": "value"}),
         ],
     )
@@ -100,9 +98,7 @@ def test_release_stress(directory_name: str) -> None:
         expected.append(Changeset(type="major", description=f"My description {i}"))
 
     expected = sorted(expected, key=lambda k: k.type + k.description)
-    assert releaser.get_status() == ReleaseStatus(
-        version="0.0.0", next_version="1.0.0", unreleased_changes=expected
-    )
+    assert releaser.get_status() == ReleaseStatus(version="0.0.0", next_version="1.0.0", unreleased_changes=expected)
     releaser.release()
     assert releaser.get_status() == ReleaseStatus(version="1.0.0", next_version=None, unreleased_changes=[])
 

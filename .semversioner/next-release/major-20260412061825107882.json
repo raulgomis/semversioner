@@ -1,4 +1,4 @@
 {
   "type": "major",
-  "description": "Upgrade dependencies: click to 8.3.x, pytest to 9.x, pytest-cov to 7.x, importlib_resources to 7.x, mypy to 1.20.x, and flake8 to 7.3.x"
+  "description": "Upgrade dependencies: click to 8.3.x, pytest to 9.x, pytest-cov to 7.x, importlib_resources to 7.x, mypy to 1.20.x, and flake8 to 7.3.x."
 }

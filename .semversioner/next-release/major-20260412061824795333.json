@@ -1,4 +1,4 @@
 {
   "type": "major",
-  "description": "Drop support for Python 3.9"
+  "description": "Drop support for Python 3.9."
 }

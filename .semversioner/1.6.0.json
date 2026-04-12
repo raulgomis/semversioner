@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "description": "Decreased packaging minimum version requirements to version 21.0",
+      "description": "Decreased packaging minimum version requirements to version 21.0.",
       "type": "minor"
     }
   ],

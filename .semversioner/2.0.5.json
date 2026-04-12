@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "description": "move main logic into __main__.py",
+      "description": "move main logic into __main__.py.",
       "type": "patch"
     }
   ],

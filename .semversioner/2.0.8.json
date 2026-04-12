@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "description": "Fix file creation race condition",
+      "description": "Fix file creation race condition.",
       "type": "patch"
     }
   ],
