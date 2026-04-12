@@ -18,13 +18,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - name: Lint code
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --show-source --statistics
-        mypy semversioner tests
+        pip install .[dev]
+    - name: Lint code
+      run: |
+        ruff check .
+        ruff format --check .
     - name: Build and test
       run: |
         pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
@@ -46,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
@@ -55,9 +58,8 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install twine==6.1.0
-        pip install wheel==0.45.1
-        pip install semversioner==2.0.3
+        pip install twine build
+        pip install .
 
         previous_version=$(semversioner current-version)
         semversioner release
@@ -66,7 +68,7 @@ jobs:
         echo "Replace version '$previous_version' to '$new_version' in __version__.py ..."
         echo "__version__ = '$new_version'" > semversioner/__version__.py
 
-        python setup.py sdist bdist_wheel
+        python -m build
         twine upload dist/*
         
         git config --global user.name 'Semversioner Bot'

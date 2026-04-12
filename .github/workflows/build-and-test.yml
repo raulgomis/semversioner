@@ -18,13 +18,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
-    - name: Lint code
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --show-source --statistics
-        mypy semversioner tests
+        pip install .[dev]
+    - name: Lint code
+      run: |
+        ruff check .
+        ruff format --check .
     - name: Build and test
       run: |
         pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml

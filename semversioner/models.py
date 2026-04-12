@@ -1,20 +1,21 @@
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
-class SemversionerException(Exception):
+class SemversionerError(Exception):
     """
     Base Exception
     """
+
     pass
 
 
-class MissingChangesetException(SemversionerException):
+class MissingChangesetError(SemversionerError):
     """
     Missing changeset files
     """
+
     pass
 
 
@@ -22,9 +23,10 @@ class ReleaseType(Enum):
     """
     Represents the type of release.
     """
-    MAJOR = 'major'
-    MINOR = 'minor'
-    PATCH = 'patch'
+
+    MAJOR = "major"
+    MINOR = "minor"
+    PATCH = "patch"
 
 
 @dataclass(frozen=True)
@@ -32,9 +34,10 @@ class Changeset:
     """
     Represents a change in the version.
     """
+
     type: str
     description: str
-    attributes: Optional[Dict[str, str]] = None
+    attributes: dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -42,9 +45,10 @@ class Release:
     """
     Represents a release.
     """
+
     version: str
-    changes: List[Changeset]
-    created_at: Optional[datetime] = None
+    changes: list[Changeset]
+    created_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -52,6 +56,7 @@ class ReleaseStatus:
     """
     Represents the status of the release in a particular point of time.
     """
+
     version: str
-    next_version: Optional[str]
-    unreleased_changes: List[Changeset]
+    next_version: str | None
+    unreleased_changes: list[Changeset]

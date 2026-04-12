@@ -1,24 +1,24 @@
-import unittest
-import shutil
 import os
+import shutil
 import tempfile
 import threading
+import unittest
 
-from semversioner import Semversioner
-from semversioner import ReleaseStatus
-from semversioner.models import Changeset, MissingChangesetException
+import pytest
+
+from semversioner import ReleaseStatus, Semversioner
+from semversioner.models import Changeset, MissingChangesetError
 
 
 class CoreTestCase(unittest.TestCase):
-
     directory_name: str
     changes_dirname: str
     next_release_dirname: str
 
     def setUp(self) -> None:
         self.directory_name = tempfile.mkdtemp()
-        self.changes_dirname = os.path.join(self.directory_name, '.semversioner')
-        self.next_release_dirname = os.path.join(self.changes_dirname, 'next-release')
+        self.changes_dirname = os.path.join(self.directory_name, ".semversioner")
+        self.next_release_dirname = os.path.join(self.changes_dirname, "next-release")
         print("Created directory: " + self.directory_name)
 
     def tearDown(self) -> None:
@@ -27,22 +27,25 @@ class CoreTestCase(unittest.TestCase):
 
     def test_increase_version(self) -> None:
         releaser = Semversioner(self.directory_name)
-        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "minor"), "1.1.0")
-        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "major"), "2.0.0")
-        self.assertEqual(releaser._get_next_version_from_type("1.0.0", "patch"), "1.0.1")
-        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "minor"), "0.2.0")
-        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "major"), "1.0.0")
-        self.assertEqual(releaser._get_next_version_from_type("0.1.1", "patch"), "0.1.2")
-        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "minor"), "9.10.0")
-        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "major"), "10.0.0")
-        self.assertEqual(releaser._get_next_version_from_type("9.9.9", "patch"), "9.9.10")
+        assert releaser._get_next_version_from_type("1.0.0", "minor") == "1.1.0"
+        assert releaser._get_next_version_from_type("1.0.0", "major") == "2.0.0"
+        assert releaser._get_next_version_from_type("1.0.0", "patch") == "1.0.1"
+        assert releaser._get_next_version_from_type("0.1.1", "minor") == "0.2.0"
+        assert releaser._get_next_version_from_type("0.1.1", "major") == "1.0.0"
+        assert releaser._get_next_version_from_type("0.1.1", "patch") == "0.1.2"
+        assert releaser._get_next_version_from_type("9.9.9", "minor") == "9.10.0"
+        assert releaser._get_next_version_from_type("9.9.9", "major") == "10.0.0"
+        assert releaser._get_next_version_from_type("9.9.9", "patch") == "9.9.10"
 
     def test_commands_with_no_changesets(self) -> None:
         releaser = Semversioner(path=self.directory_name)
-        self.assertEqual(releaser.generate_changelog(), "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
-        self.assertEqual(releaser.get_last_version(), "0.0.0")
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(MissingChangesetException):
+        assert (
+            releaser.generate_changelog()
+            == "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n"
+        )
+        assert releaser.get_last_version() == "0.0.0"
+        assert releaser.get_status() == ReleaseStatus(version="0.0.0", next_version=None, unreleased_changes=[])
+        with pytest.raises(MissingChangesetError):
             releaser.release()
 
     def test_release(self) -> None:
@@ -51,13 +54,17 @@ class CoreTestCase(unittest.TestCase):
 
         releaser.add_change("minor", "My description")
         releaser.add_change("major", "My description")
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version='1.0.0', unreleased_changes=[
-            Changeset(type='major', description='My description'),
-            Changeset(type='minor', description='My description')]
-        ))
+        assert releaser.get_status() == ReleaseStatus(
+            version="0.0.0",
+            next_version="1.0.0",
+            unreleased_changes=[
+                Changeset(type="major", description="My description"),
+                Changeset(type="minor", description="My description"),
+            ],
+        )
         releaser.release()
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(MissingChangesetException):
+        assert releaser.get_status() == ReleaseStatus(version="1.0.0", next_version=None, unreleased_changes=[])
+        with pytest.raises(MissingChangesetError):
             releaser.release()
 
     def test_release_with_attributes(self) -> None:
@@ -66,13 +73,17 @@ class CoreTestCase(unittest.TestCase):
 
         releaser.add_change("minor", "My description", attributes={"key": "value"})
         releaser.add_change("major", "My description", attributes={"key2": "value2", "key3": "value3"})
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version='1.0.0', unreleased_changes=[
-            Changeset(type='major', description='My description', attributes={"key2": "value2", "key3": "value3"}),
-            Changeset(type='minor', description='My description', attributes={"key": "value"})]
-        ))
+        assert releaser.get_status() == ReleaseStatus(
+            version="0.0.0",
+            next_version="1.0.0",
+            unreleased_changes=[
+                Changeset(type="major", description="My description", attributes={"key2": "value2", "key3": "value3"}),
+                Changeset(type="minor", description="My description", attributes={"key": "value"}),
+            ],
+        )
         releaser.release()
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
-        with self.assertRaises(MissingChangesetException):
+        assert releaser.get_status() == ReleaseStatus(version="1.0.0", next_version=None, unreleased_changes=[])
+        with pytest.raises(MissingChangesetError):
             releaser.release()
 
     def test_release_stress(self) -> None:
@@ -82,12 +93,14 @@ class CoreTestCase(unittest.TestCase):
         expected = []
         for i in range(100):
             releaser.add_change("major", f"My description {i}")
-            expected.append(Changeset(type='major', description=f"My description {i}"))
+            expected.append(Changeset(type="major", description=f"My description {i}"))
 
         expected = sorted(expected, key=lambda k: k.type + k.description)
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='0.0.0', next_version='1.0.0', unreleased_changes=expected))
+        assert releaser.get_status() == ReleaseStatus(
+            version="0.0.0", next_version="1.0.0", unreleased_changes=expected
+        )
         releaser.release()
-        self.assertEqual(releaser.get_status(), ReleaseStatus(version='1.0.0', next_version=None, unreleased_changes=[]))
+        assert releaser.get_status() == ReleaseStatus(version="1.0.0", next_version=None, unreleased_changes=[])
 
     def test_concurrent_changeset_creation_race_condition(self) -> None:
         """
@@ -111,8 +124,8 @@ class CoreTestCase(unittest.TestCase):
             t.join()
 
         # Check that all changeset files were created and are unique
-        files = [f for f in os.listdir(self.next_release_dirname) if f.endswith('.json')]
-        self.assertEqual(len(files), num_threads)
+        files = [f for f in os.listdir(self.next_release_dirname) if f.endswith(".json")]
+        assert len(files) == num_threads
         # Optionally, check that all descriptions are present
         found_descriptions = set()
         for f in files:
@@ -121,32 +134,32 @@ class CoreTestCase(unittest.TestCase):
                 for desc in descriptions:
                     if desc in data:
                         found_descriptions.add(desc)
-        self.assertEqual(set(descriptions), found_descriptions)
+        assert set(descriptions) == found_descriptions
 
     def test_is_deprecated(self) -> None:
         releaser = Semversioner(self.directory_name)
-        self.assertFalse(releaser.is_deprecated())
+        assert not releaser.is_deprecated()
 
     def test_check_nok(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
-        self.assertFalse(releaser.check())
+        assert not releaser.check()
 
     def test_check_ok(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
 
-        self.assertFalse(releaser.check())
+        assert not releaser.check()
         releaser.add_change("major", "My description")
-        self.assertTrue(releaser.check())
+        assert releaser.check()
 
     def test_check_after_release(self) -> None:
 
         releaser = Semversioner(path=self.directory_name)
         releaser.add_change("major", "My description")
         releaser.release()
-        self.assertFalse(releaser.check())
+        assert not releaser.check()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,0 @@
--r requirements.txt
-pytest==9.0.3
-pytest-cov==7.1.0
-importlib_resources==7.0.0
-mypy==1.20.0
-flake8==7.3.0
