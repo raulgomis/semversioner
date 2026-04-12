@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Add test coverage calculation and GitHub Actions integration"
+}

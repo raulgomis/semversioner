@@ -27,7 +27,13 @@ jobs:
         mypy semversioner tests
     - name: Build and test
       run: |
-        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
+    - name: Upload coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-results-${{ matrix.python-version }}
+        path: coverage.xml
+      if: ${{ always() }}
     - name: Upload pytest test results
       uses: actions/upload-artifact@v4
       with:

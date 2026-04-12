@@ -21,6 +21,10 @@ lint:
 test:
 	@$(ENV)/bin/python -m pytest
 
+.PHONY: coverage
+coverage:
+	@$(ENV)/bin/python -m pytest --cov=semversioner --cov-report=term-missing
+
 .PHONY: clean
 clean:
 	@rm -vrf venv/
