@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "description": "Add test coverage calculation and GitHub Actions integration",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2026-04-12T04:58:17+00:00",
+  "version": "2.1.2"
+}
