@@ -1,13 +1,15 @@
 import dataclasses
 import json
+import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 
-import click
 from packaging.version import parse
 
 from semversioner.models import Changeset, Release
+
+logger = logging.getLogger("semversioner")
 
 
 class SemversionerStorage(metaclass=ABCMeta):
@@ -172,7 +174,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
                 continue
 
     def remove_all_changesets(self) -> None:
-        click.echo(f"Removing changeset files in '{self.next_release_path}' directory.")
+        logger.info(f"Removing changeset files in '{self.next_release_path}' directory.")
 
         # Remove all json files in next_release_path
         for file_path in self.next_release_path.iterdir():
@@ -180,7 +182,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
                 file_path.unlink()
         # Remove next_release_path if the directory is empty
         if not any(self.next_release_path.iterdir()):
-            click.echo(f"Removing '{self.next_release_path}' directory.")
+            logger.info(f"Removing '{self.next_release_path}' directory.")
             self.next_release_path.rmdir()
 
     def list_changesets(self) -> list[Changeset]:
@@ -200,7 +202,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         release_json_file = self.semversioner_path / f"{version}.json"
         with release_json_file.open("w") as f:
             f.write(ReleaseJsonMapper.to_json(release))
-        click.echo(f"Generated '{release_json_file}' file.")
+        logger.info(f"Generated '{release_json_file}' file.")
 
     def list_versions(self) -> list[Release]:
         releases: list[Release] = []

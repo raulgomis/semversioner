@@ -1,7 +1,7 @@
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-import click
 from jinja2 import Template
 
 from semversioner.models import (
@@ -13,6 +13,8 @@ from semversioner.models import (
     SemversionerError,
 )
 from semversioner.storage import SemversionerFileSystemStorage
+
+logger = logging.getLogger("semversioner")
 
 ROOTDIR = Path.cwd()
 INITIAL_VERSION = "0.0.0"
@@ -112,7 +114,7 @@ class Semversioner:
         if next_version_number is None:
             raise SemversionerError("Can't calculate next version number.")
 
-        click.echo(f"Releasing version: {current_version_number} -> {next_version_number}")
+        logger.info(f"Releasing version: {current_version_number} -> {next_version_number}")
 
         release = Release(version=next_version_number, changes=changes, created_at=datetime.now(timezone.utc))
 

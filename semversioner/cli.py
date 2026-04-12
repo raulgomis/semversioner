@@ -28,6 +28,7 @@ Usage
     $ semversioner next-version
 """
 
+import logging
 import sys
 from pathlib import Path
 from typing import TextIO
@@ -37,6 +38,20 @@ import click
 from semversioner import __version__
 from semversioner.core import Semversioner
 from semversioner.models import MissingChangesetError, Release, ReleaseStatus
+
+
+# Configure the logger for semversioner
+class ClickHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        click.echo(self.format(record))
+
+
+logger = logging.getLogger("semversioner")
+logger.setLevel(logging.INFO)
+handler = ClickHandler()
+handler.setFormatter(logging.Formatter("%(message)s"))
+logger.addHandler(handler)
+logger.propagate = False
 
 ROOTDIR = Path.cwd()
 
