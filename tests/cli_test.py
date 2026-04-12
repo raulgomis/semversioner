@@ -41,7 +41,7 @@ def get_file(filename: str) -> Traversable:
 
 
 def read_file(filename: str) -> str:
-    return files('tests.resources').joinpath(filename).read_text()
+    return files('tests.resources').joinpath(filename).read_text()  # type: ignore
 
 
 class TestUtilsParseKeyValue(unittest.TestCase):
