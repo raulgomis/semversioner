@@ -4,7 +4,6 @@ import re
 import shutil
 import tempfile
 import unittest
-from pathlib import Path
 from typing import List
 
 from click.testing import CliRunner, Result
@@ -13,6 +12,9 @@ from importlib_resources import files
 from semversioner import __version__
 from semversioner.cli import cli, parse_key_value_pair
 from tests import fixtures
+
+
+from importlib_resources.abc import Traversable
 
 
 def command_processor(commands: List[List[str]], path: str) -> Result:
@@ -33,8 +35,8 @@ def single_command_processor(command: List[str], path: str) -> Result:
     return result
 
 
-def get_file(filename: str) -> Path: 
-    path: Path = files('tests.resources').joinpath(filename)
+def get_file(filename: str) -> Traversable: 
+    path: Traversable = files('tests.resources').joinpath(filename)
     return path
 
 

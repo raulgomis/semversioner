@@ -12,9 +12,9 @@ jobs:
       matrix:
         python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
         architecture: x64
@@ -29,13 +29,13 @@ jobs:
       run: |
         pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
     - name: Upload coverage results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: coverage-results-${{ matrix.python-version }}
         path: coverage.xml
       if: ${{ always() }}
     - name: Upload pytest test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: pytest-results-${{ matrix.python-version }}
         path: junit/test-results-${{ matrix.python-version }}.xml

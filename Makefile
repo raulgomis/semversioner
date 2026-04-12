@@ -1,6 +1,6 @@
 ENV='venv'
 
-all: setup lint test
+all: setup lint test coverage
 
 .PHONY: setup
 setup:
@@ -28,4 +28,4 @@ coverage:
 .PHONY: clean
 clean:
 	@rm -vrf venv/
-	@rm -vrf .mypy_cache .pytest_cache __pycache__/*
+	@rm -vrf .mypy_cache .pytest_cache __pycache__/* .coverage coverage.xml junit/*
