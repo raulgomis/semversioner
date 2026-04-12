@@ -141,10 +141,10 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return self.deprecated
 
     def create_changeset(self, change: Changeset) -> str:
-        """ 
+        """
         Create a new changeset file.
 
-        The method creates a new json file in the ``.semversioner/next-release/`` directory 
+        The method creates a new json file in the ``.semversioner/next-release/`` directory
         with the type and description provided.
 
         Parameters

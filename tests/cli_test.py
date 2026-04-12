@@ -35,13 +35,13 @@ def single_command_processor(command: List[str], path: str) -> Result:
     return result
 
 
-def get_file(filename: str) -> Traversable: 
+def get_file(filename: str) -> Traversable:
     path: Traversable = files('tests.resources').joinpath(filename)
     return path
 
 
 def read_file(filename: str) -> str:
-    return files('tests.resources').joinpath(filename).read_text()  # type: ignore
+    return files('tests.resources').joinpath(filename).read_text()
 
 
 class TestUtilsParseKeyValue(unittest.TestCase):
@@ -194,7 +194,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, fixtures.CHANGELOG_3)
 
-    def test_generate_changelog_multiple_new(self) -> None:  
+    def test_generate_changelog_multiple_new(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -225,7 +225,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\nNote: version releases in the 0.x.y range may introduce breaking changes.\n")
 
-    def test_generate_changelog_with_custom_template(self) -> None:  
+    def test_generate_changelog_with_custom_template(self) -> None:
         commands = [
             ["add-change", "--type", "major", "--description", "This is my major description"],
             ["add-change", "--type", "minor", "--description", "This is my minor description"],
@@ -277,7 +277,7 @@ class ChangelogCommandTest(CommandTest):
 
         self.assertEqual(result.output, fixtures.CHANGELOG_4)
 
-    def test_generate_changelog_with_custom_template_empty(self) -> None:  
+    def test_generate_changelog_with_custom_template_empty(self) -> None:
         commands = [
             ["changelog", "--template", str(get_file("template_01.j2"))]
         ]
@@ -285,7 +285,7 @@ class ChangelogCommandTest(CommandTest):
         result = command_processor(commands, self.directory_name)
         self.assertEqual(result.output, "# Changelog\n")
 
-    def test_generate_changelog_with_custom_not_existent(self) -> None: 
+    def test_generate_changelog_with_custom_not_existent(self) -> None:
         result = single_command_processor(["changelog", "--template", "non-existent-file.j2"], self.directory_name)
         assert result.exit_code == 2
         assert "Error: Invalid value for '--template': 'non-existent-file.j2': No such file or directory" in result.output

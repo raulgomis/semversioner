@@ -34,10 +34,10 @@ class Semversioner:
         return self.fs.is_deprecated()
 
     def add_change(self, change_type: str, description: str, attributes: Optional[Dict[str, str]] = None) -> str:
-        """ 
+        """
         Create a new changeset file.
 
-        The method creates a new json file in the ``.semversioner/next-release/`` directory 
+        The method creates a new json file in the ``.semversioner/next-release/`` directory
         with the type and description provided.
 
         Parameters
@@ -55,10 +55,10 @@ class Semversioner:
         return self.fs.create_changeset(Changeset(type=change_type, description=description, attributes=attributes))
 
     def generate_changelog(self, version: Optional[str] = None, template: str = DEFAULT_TEMPLATE) -> str:
-        """ 
+        """
         Generates the changelog.
 
-        The method generates the changelog based on the template file defined 
+        The method generates the changelog based on the template file defined
         in ``DEFAULT_TEMPLATE``.
 
         Returns
@@ -78,11 +78,11 @@ class Semversioner:
         )
 
     def release(self) -> Release:
-        """ 
+        """
         Performs the release.
 
-        The method performs the release by taking everything in ``next-release`` folder 
-        and aggregating all together in a single JSON file for that release (e.g ``1.12.0.json``). 
+        The method performs the release by taking everything in ``next-release`` folder
+        and aggregating all together in a single JSON file for that release (e.g ``1.12.0.json``).
         The JSON file generated is a list of all the individual JSON files from ``next-release``.
         After aggregating the files, it removes the ``next-release`` directory.
 
@@ -118,7 +118,7 @@ class Semversioner:
         return release
 
     def get_last_version(self) -> str:
-        """ 
+        """
         Gets the current version. Returns '0.0.0' if there are not versions created.
 
         """
@@ -157,7 +157,7 @@ class Semversioner:
         return len(changes) > 0
 
     def _get_next_version_from_type(self, current_version: str, release_type: str) -> str:
-        """ 
+        """
         Returns a string like '1.0.0'.
         """
         # Convert to a list of ints: [1, 0, 0].

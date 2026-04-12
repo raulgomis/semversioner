@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Semversioner allows you to manage semantic versioning properly and simplifies changelog generation. 
+Semversioner allows you to manage semantic versioning properly and simplifies changelog generation.
 
 This project was inspired by the way AWS manages their versioning for AWS-CLI: https://github.com/aws/aws-cli/
 
