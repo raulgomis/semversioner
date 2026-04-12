@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 2.2.0
+
+- minor: Update GitHub Actions to the latest version, and upgrade all dependencies
+
 ## 2.1.2
 
 - patch: Add test coverage calculation and GitHub Actions integration
