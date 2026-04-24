@@ -33,4 +33,11 @@ test-reports/
 venv*
 .vscode/
 
+# OS Specific
 .DS_Store
+Thumbs.db
+
+# Cache and temporary files
+.pytest_cache/
+.ruff_cache/
+__pycache__/
