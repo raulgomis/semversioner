@@ -353,7 +353,7 @@ wheels = [
 ]
 
 [[package]]
-name = "semversioner2"
+name = "semversioner"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
