@@ -67,31 +67,31 @@ jobs:
         git tag -a -m "test-v${{ steps.release-info.outputs.new_version }}" "test-${{ steps.release-info.outputs.new_version }}"
         git push origin "test-${{ steps.release-info.outputs.new_version }}"
 
-  publish:
-    name: Publish to PyPI
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for Trusted Publishing
-      contents: write # Required for creating GitHub Release
-    steps: 
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: release-dists
-        path: dist/
-        
-    - name: Publish release distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        packages-dir: dist/
-        dry-run: true
-        
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v3
-      with:
-        tag_name: ${{ needs.build.outputs.new_version }}
-        body_path: CHANGELOG.md
-        files: dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  publish:
+#    name: Publish to PyPI
+#    needs: build
+#    runs-on: ubuntu-latest
+#    permissions:
+#      id-token: write # Required for Trusted Publishing
+#      contents: write # Required for creating GitHub Release
+#    steps: 
+#    - name: Download Artifacts
+#      uses: actions/download-artifact@v4
+#      with:
+#        name: release-dists
+#        path: dist/
+#        
+#    - name: Publish release distributions to PyPI
+#      uses: pypa/gh-action-pypi-publish@release/v1
+#      with:
+#        packages-dir: dist/
+#        dry-run: true
+#        
+#    - name: Create GitHub Release
+#      uses: softprops/action-gh-release@v3
+#      with:
+#        tag_name: ${{ needs.build.outputs.new_version }}
+#        body_path: CHANGELOG.md
+#        files: dist/*
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
