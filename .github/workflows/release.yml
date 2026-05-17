@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - test-release-process
 
 jobs:
   build:
@@ -64,10 +64,10 @@ jobs:
         
         git add .
         git commit -m "chore: release version ${{ steps.release-info.outputs.new_version }} [skip ci]"
-        git push origin master
+        git push origin test-release-process
         
-        git tag -a -m "v${{ steps.release-info.outputs.new_version }}" "${{ steps.release-info.outputs.new_version }}"
-        git push origin "${{ steps.release-info.outputs.new_version }}"
+        git tag -a -m "test-v${{ steps.release-info.outputs.new_version }}" "test-${{ steps.release-info.outputs.new_version }}"
+        git push origin "test-${{ steps.release-info.outputs.new_version }}"
 
   publish:
     name: Publish to PyPI
@@ -87,6 +87,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: dist/
+        dry-run: true
         
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v3
