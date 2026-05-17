@@ -62,7 +62,7 @@ select = ["E", "F", "W", "I", "C90", "N", "UP", "B", "A", "C4", "PT", "ARG", "RE
 ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"semversioner/__init__.py" = ["F401", "F403"]
+"semversioner/__init__.py" = ["F401"]
 "tests/*" = ["ARG001", "ARG002", "PTH", "PT"]
 
 [tool.ruff.lint.isort]

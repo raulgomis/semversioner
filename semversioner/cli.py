@@ -102,7 +102,7 @@ def cli_release(ctx: click.Context) -> None:
 @click.option("--version", default=None, help="Filter the changelog by version.")
 @click.option("--template", default=None, help="Path to a custom changelog template.", type=click.File("r"))
 @click.pass_context
-def cli_changelog(ctx: click.Context, version: str | None, template: TextIO) -> None:
+def cli_changelog(ctx: click.Context, version: str | None, template: TextIO | None) -> None:
     releaser: Semversioner = ctx.obj["releaser"]
     if template:
         changelog = releaser.generate_changelog(version=version, template=template.read())

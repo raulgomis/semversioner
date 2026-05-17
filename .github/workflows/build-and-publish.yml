@@ -13,22 +13,21 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Python
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: ${{ matrix.python-version }}
-        architecture: x64
+        enable-cache: true
+    - name: Set up Python
+      run: uv python install ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install .[dev]
+      run: uv sync --all-extras --dev
     - name: Lint code
       run: |
-        ruff check .
-        ruff format --check .
+        uv run ruff check .
+        uv run ruff format --check .
     - name: Build and test
       run: |
-        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
+        uv run pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
     - name: Upload coverage results
       uses: actions/upload-artifact@v7
       with:
@@ -49,27 +48,28 @@ jobs:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
-    - name: Set up Python
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: '3.10'
+        enable-cache: true
+    - name: Set up Python
+      run: uv python install 3.10
     - name: Publish
       env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        UV_PUBLISH_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        UV_PUBLISH_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pip install twine build
-        pip install .
+        uv sync
 
-        previous_version=$(semversioner current-version)
-        semversioner release
-        new_version=$(semversioner current-version)
-        semversioner changelog > CHANGELOG.md
+        previous_version=$(uv run semversioner current-version)
+        uv run semversioner release
+        new_version=$(uv run semversioner current-version)
+        uv run semversioner changelog > CHANGELOG.md
         echo "Replace version '$previous_version' to '$new_version' in __version__.py ..."
-        echo "__version__ = '$new_version'" > semversioner/__version__.py
+        echo "__version__ = \"$new_version\"" > semversioner/__version__.py
 
-        python -m build
-        twine upload dist/*
+        uv build
+        uv publish
         
         git config --global user.name 'Semversioner Bot'
         git config --global user.email 'semversioner@users.noreply.github.com'

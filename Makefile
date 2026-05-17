@@ -1,26 +1,23 @@
-ENV='venv'
+ENV='.venv'
 
 all: setup lint test coverage
 
 .PHONY: setup
 setup:
-	@# It assumes the default python3 installation for Mac OS is python 3
-	@test -d $(ENV) || python3 -m venv $(ENV)
-	@$(ENV)/bin/python3 -m pip install --upgrade pip
-	@$(ENV)/bin/python3 -m pip install -e .[dev]
+	@uv sync --all-extras --dev
 
 .PHONY: lint
 lint:
-	@$(ENV)/bin/ruff check .
-	@$(ENV)/bin/ruff format --check .
+	@uv run ruff check .
+	@uv run ruff format --check .
 
 .PHONY: test
 test:
-	@$(ENV)/bin/python -m pytest
+	@uv run pytest
 
 .PHONY: coverage
 coverage:
-	@$(ENV)/bin/python -m pytest --cov=semversioner --cov-report=term-missing
+	@uv run pytest --cov=semversioner --cov-report=term-missing
 
 .PHONY: clean
 clean:
