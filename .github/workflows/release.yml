@@ -23,17 +23,12 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v8.1.0
       with:
+        python-version: '3.14'
         enable-cache: true
-    
-    - name: Set up Python
-      run: uv python install 3.14
     
     - name: Prepare Release
       id: release-info
       run: |
-        uv venv 3.14
-        uv pip install semversioner
-        
         # 1. Consolidate changes
         uv run semversioner release
         new_version=$(uv run semversioner current-version)
