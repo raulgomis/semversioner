@@ -108,10 +108,13 @@ class ReleaseJsonMapper:
         if "created_at" in data:  # New format
             created_at = datetime.fromisoformat(data["created_at"])
             version = data["version"]
-            changes = sorted(data["changes"], key=lambda k: k["type"] + k["description"])
+            raw_changes = data["changes"]
         else:
-            changes = sorted(data, key=lambda k: k["type"] + k["description"])
+            raw_changes = data
             version = release_identifier
+
+        changes = [Changeset(**c) for c in raw_changes]
+        changes = sorted(changes, key=lambda k: k.type + k.description)
 
         return Release(version=version, changes=changes, created_at=created_at)
 
