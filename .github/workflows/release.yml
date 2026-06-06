@@ -89,9 +89,8 @@ jobs:
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: release version $new_version [skip ci]"
           git push origin HEAD:${{ github.ref_name }}
           
-          # Commented out to prevent polluting production tags during test
-          # git tag -a -m "v$new_version" "$new_version"
-          # git push origin "$new_version"
+          git tag -a -m "test-v$new_version" "test-v$new_version"
+          git push origin "test-v$new_version"
         else
           echo "has_changes=false" >> $GITHUB_OUTPUT
           echo "No changesets found. Bypassing release."
@@ -102,9 +101,8 @@ jobs:
       run: |
         uv build
 
-    # Commented out to prevent publishing to PyPI during testing
-    # - name: Publish release distributions to PyPI
-    #   if: steps.release-run.outputs.has_changes == 'true'
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     packages-dir: dist/
+    - name: Publish release distributions to PyPI
+      if: steps.release-run.outputs.has_changes == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: dist/
