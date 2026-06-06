@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
-Semversioner allows you to manage semantic versioning properly and simplifies changelog generation. 
+Semversioner allows you to manage semantic versioning properly and simplifies changelog generation.
 
 This project was inspired by the way AWS manages their versioning for AWS-CLI: https://github.com/aws/aws-cli/
 
@@ -29,20 +28,37 @@ Usage
     $ semversioner next-version
 """
 
-import os
+import logging
 import sys
-from typing import Dict, List, Optional, TextIO
+from pathlib import Path
+from typing import TextIO
 
 import click
 
 from semversioner import __version__
 from semversioner.core import Semversioner
-from semversioner.models import (MissingChangesetException, Release, ReleaseStatus)
-
-ROOTDIR = os.getcwd()
+from semversioner.models import MissingChangesetError, Release, ReleaseStatus
 
 
-def parse_key_value_pair(ctx: Optional[click.core.Context], param: Optional[click.core.Parameter], value: List[str]) -> Optional[Dict[str, str]]:
+# Configure the logger for semversioner
+class ClickHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        click.echo(self.format(record))
+
+
+logger = logging.getLogger("semversioner")
+logger.setLevel(logging.INFO)
+handler = ClickHandler()
+handler.setFormatter(logging.Formatter("%(message)s"))
+logger.addHandler(handler)
+logger.propagate = False
+
+ROOTDIR = Path.cwd()
+
+
+def parse_key_value_pair(
+    _ctx: click.core.Context | None, _param: click.core.Parameter | None, value: list[str]
+) -> dict[str, str] | None:
     """
     Parses a list of strings into a dictionary where each string is a key-value pair.
     """
@@ -50,42 +66,44 @@ def parse_key_value_pair(ctx: Optional[click.core.Context], param: Optional[clic
         return None
     dict_value = {}
     for item in value:
-        key, val = item.split('=', 1)
+        key, val = item.split("=", 1)
         dict_value[key] = val
     return dict_value
 
 
 @click.group()
-@click.option('--path', default=ROOTDIR, help="Base path. Default to current directory.", type=click.Path(exists=True))
-@click.version_option(version=str(__version__.__version__))
+@click.option(
+    "--path", default=str(ROOTDIR), help="Base path. Default to current directory.", type=click.Path(exists=True)
+)
+@click.version_option(version=__version__)
 @click.pass_context
 def cli(ctx: click.Context, path: str) -> None:
-    ctx.obj = {
-        'releaser': Semversioner(path=path)
-    }
+    ctx.obj = {"releaser": Semversioner(path=path)}
 
 
-@cli.command('release', help="Release a new version.")
+@cli.command("release", help="Release a new version.")
 @click.pass_context
 def cli_release(ctx: click.Context) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj["releaser"]
     if releaser.is_deprecated():
-        click.secho("WARN", bg='yellow', fg='black', nl=False)
-        click.secho(" deprecated ", fg='magenta', nl=False)
-        click.echo("Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message.")
+        click.secho("WARN", bg="yellow", fg="black", nl=False)
+        click.secho(" deprecated ", fg="magenta", nl=False)
+        click.echo(
+            "Semversioner now uses '.semversioner' directory instead of '.changes'. Please, rename it to remove this message."
+        )
     try:
         result: Release = releaser.release()
         click.echo(message="Successfully created new release: " + result.version)
-    except MissingChangesetException:
-        click.secho("Error: No changes to release. Skipping release process.", fg='red')
+    except MissingChangesetError:
+        click.secho("Error: No changes to release. Skipping release process.", fg="red")
 
 
-@cli.command('changelog', help="Print the changelog.")
-@click.option('--version', default=None, help="Filter the changelog by version.")
-@click.option('--template', default=None, help="Path to a custom changelog template.", type=click.File('r'))
+@cli.command("changelog", help="Print the changelog.")
+@click.option("--version", default=None, help="Filter the changelog by version.")
+@click.option("--template", default=None, help="Path to a custom changelog template.", type=click.File("r"))
 @click.pass_context
-def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
+def cli_changelog(ctx: click.Context, version: str | None, template: TextIO | None) -> None:
+    releaser: Semversioner = ctx.obj["releaser"]
     if template:
         changelog = releaser.generate_changelog(version=version, template=template.read())
     else:
@@ -93,59 +111,59 @@ def cli_changelog(ctx: click.Context, version: Optional[str], template: TextIO) 
     click.echo(message=changelog, nl=False)
 
 
-@cli.command('add-change', help="Create a new changeset file.")
+@cli.command("add-change", help="Create a new changeset file.")
 @click.pass_context
-@click.option('--type', '-t', type=click.Choice(['major', 'minor', 'patch']), required=True)
-@click.option('--description', '-d', required=True)
-@click.option('--attributes', multiple=True, callback=parse_key_value_pair, help='Attributes in key=value format.')
-def cli_add_change(ctx: click.Context, type: str, description: str, attributes: Optional[dict]) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
-    path: str = releaser.add_change(type, description, attributes)
+@click.option("--type", "-t", "change_type", type=click.Choice(["major", "minor", "patch"]), required=True)
+@click.option("--description", "-d", required=True)
+@click.option("--attributes", multiple=True, callback=parse_key_value_pair, help="Attributes in key=value format.")
+def cli_add_change(ctx: click.Context, change_type: str, description: str, attributes: dict | None) -> None:
+    releaser: Semversioner = ctx.obj["releaser"]
+    path: str = releaser.add_change(change_type, description, attributes)
     click.echo(message="Successfully created file " + path)
 
 
-@cli.command('current-version', help="Show the current version.")
+@cli.command("current-version", help="Show the current version.")
 @click.pass_context
 def cli_current_version(ctx: click.Context) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj["releaser"]
     version = releaser.get_last_version()
     click.echo(message=version)
 
 
-@cli.command('next-version', help="Show computed next version.")
+@cli.command("next-version", help="Show computed next version.")
 @click.pass_context
 def cli_next_version(ctx: click.Context) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj["releaser"]
     version = releaser.get_next_version()
     if version is None:
-        click.secho(message="Error: No changes found. No next version available.", fg='red')
+        click.secho(message="Error: No changes found. No next version available.", fg="red")
         sys.exit(-1)
 
     click.echo(message=version, nl=False)
 
 
-@cli.command('status', help="Show the status of the working directory.")
+@cli.command("status", help="Show the status of the working directory.")
 @click.pass_context
 def status(ctx: click.Context) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
-    status: ReleaseStatus = releaser.get_status()
-    click.echo(message=f"Version: {status.version}")
-    if len(status.unreleased_changes) > 0:
-        click.echo(message=f"Next version: {status.next_version}")
+    releaser: Semversioner = ctx.obj["releaser"]
+    status_info: ReleaseStatus = releaser.get_status()
+    click.echo(message=f"Version: {status_info.version}")
+    if len(status_info.unreleased_changes) > 0:
+        click.echo(message=f"Next version: {status_info.next_version}")
         click.echo(message="Unreleased changes:")
-        for change in status.unreleased_changes:
+        for change in status_info.unreleased_changes:
             click.secho(message=f"\t{change.type}:\t{change.description}", fg="red")
-        click.echo(message="(use \"semversioner release\" to release the next version)")
+        click.echo(message='(use "semversioner release" to release the next version)')
     else:
-        click.echo(message="No changes to release (use \"semversioner add-change\")")
+        click.echo(message='No changes to release (use "semversioner add-change")')
 
 
-@cli.command('check', help="Verifies changeset files exist.")
+@cli.command("check", help="Verifies changeset files exist.")
 @click.pass_context
 def cli_check(ctx: click.Context) -> None:
-    releaser: Semversioner = ctx.obj['releaser']
+    releaser: Semversioner = ctx.obj["releaser"]
     if not releaser.check():
-        click.secho("Error: No changes to release.", fg='red')
+        click.secho("Error: No changes to release.", fg="red")
         sys.exit(-1)
     else:
-        click.echo('OK')
+        click.echo("OK")

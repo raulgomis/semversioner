@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semversioner"
+dynamic = ["version"]
+description = "Manage properly semver in your repository"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Raul Gomis", email = "raulgomis@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.0.0",
+    "jinja2>=3.0.0",
+    "packaging>=21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=6.0.0",
+    "importlib_resources>=6.0.0",
+    "ruff>=0.9.0",
+]
+
+[project.scripts]
+semversioner = "semversioner.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/raulgomis/semversioner"
+
+[tool.setuptools]
+packages = ["semversioner"]
+
+[tool.setuptools.dynamic]
+version = {attr = "semversioner.__version__.__version__"}
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "C90", "N", "UP", "B", "A", "C4", "PT", "ARG", "RET", "SIM", "PTH", "ERA"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"semversioner/__init__.py" = ["F401"]
+"tests/*" = ["ARG001", "ARG002", "PTH", "PT"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["semversioner"]

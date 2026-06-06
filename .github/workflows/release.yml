@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python-version: [ '3.10', '3.11', '3.12', '3.13', '3.14' ]
+    steps:
+    - uses: actions/checkout@v6
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v8.1.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        
+    - name: Install dependencies
+      run: uv sync --all-extras --dev
+
+    - name: Lint code
+      run: |
+        uv run ruff check .
+        uv run ruff format --check .
+
+    - name: Build and test
+      run: |
+        uv run pytest --cov=semversioner --cov-report=term-missing --cov-report=xml
+
+  release:
+    name: Release and Publish
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write # Required for Trusted Publishing
+    outputs:
+      has_changes: ${{ steps.release-run.outputs.has_changes }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Install uv
+      uses: astral-sh/setup-uv@v8.1.0
+      with:
+        python-version: '3.14'
+        enable-cache: true
+
+    - name: Install stable semversioner
+      run: uv tool install semversioner==2.2.0
+
+    - name: Check and Release
+      id: release-run
+      run: |
+        if semversioner check >/dev/null 2>&1; then
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          
+          # 1. Prepare Release
+          semversioner release
+          new_version=$(semversioner current-version)
+          semversioner changelog > CHANGELOG.md
+          echo "__version__ = \"$new_version\"" > semversioner/__version__.py
+          
+          # 2. Commit, Tag and Push Changes
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: release version $new_version [skip ci]"
+          git push origin master
+          
+          git tag -a -m "v$new_version" "$new_version"
+          git push origin "$new_version"
+        else
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changesets found. Bypassing release."
+        fi
+
+    - name: Build Artifacts
+      if: steps.release-run.outputs.has_changes == 'true'
+      run: |
+        uv build
+
+    - name: Publish release distributions to PyPI
+      if: steps.release-run.outputs.has_changes == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: dist/

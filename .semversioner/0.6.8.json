@@ -1,6 +1,6 @@
 [
   {
-    "description": "Tag the repository when releasing",
+    "description": "Tag the repository when releasing.",
     "type": "patch"
   }
 ]

@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "description": "Add test coverage calculation and GitHub Actions integration",
+      "description": "Add test coverage calculation and GitHub Actions integration.",
       "type": "patch"
     }
   ],

@@ -1,10 +1,10 @@
 [
   {
-    "description": "Deprecated .changes directory in favour of .semversioner directory",
+    "description": "Deprecated .changes directory in favour of .semversioner directory.",
     "type": "minor"
   },
   {
-    "description": "Internal refactor to improve code quality and test coverage",
+    "description": "Internal refactor to improve code quality and test coverage.",
     "type": "patch"
   }
 ]

@@ -1,33 +1,39 @@
 name: Build and Test (branches)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:    
       - 'feature/*'
       - 'fix/*'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: [ '3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Python
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v8.1.0
       with:
         python-version: ${{ matrix.python-version }}
-        architecture: x64
+        enable-cache: true
+    - name: Install dependencies
+      run: uv sync --all-extras --dev
     - name: Lint code
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --show-source --statistics
-        mypy semversioner tests
+        uv run ruff check .
+        uv run ruff format --check .
     - name: Build and test
       run: |
-        pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
+        uv run pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
     - name: Upload coverage results
       uses: actions/upload-artifact@v7
       with:

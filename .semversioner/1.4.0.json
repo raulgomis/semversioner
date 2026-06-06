@@ -4,7 +4,7 @@
     "type": "minor"
   },
   {
-    "description": "All tests are now able to be run on Windows",
+    "description": "All tests are now able to be run on Windows.",
     "type": "patch"
   },
   {

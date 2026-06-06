@@ -1,0 +1,4 @@
+{
+  "type": "major",
+  "description": "Decoupled CLI from Core and Storage layers: remove internal click output, delegating UI responsibilities to the CLI module."
+}
