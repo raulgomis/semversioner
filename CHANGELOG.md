@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 3.1.0
+
+- minor: Test
+
 ## 3.0.0
 
 - major: Decoupled CLI from Core and Storage layers: remove internal click output, delegating UI responsibilities to the CLI module.
