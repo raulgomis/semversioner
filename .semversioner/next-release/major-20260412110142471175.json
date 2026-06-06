@@ -1,4 +1,0 @@
-{
-  "type": "major",
-  "description": "Replaced Flake8 and MyPy with Ruff. Adopted linting and formatting rules of the Ruff project."
-}

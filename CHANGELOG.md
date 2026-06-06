@@ -1,17 +1,30 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 3.0.0
+
+- major: Decoupled CLI from Core and Storage layers: remove internal click output, delegating UI responsibilities to the CLI module.
+- major: Drop support for Python 3.8.
+- major: Drop support for Python 3.9.
+- major: Replaced Flake8 and MyPy with Ruff. Adopted linting and formatting rules of the Ruff project.
+- major: Upgrade dependencies: click to 8.3.x, pytest to 9.x, pytest-cov to 7.x, importlib_resources to 7.x, mypy to 1.20.x, and flake8 to 7.3.x.
+- minor: Added AGENTS.md with AI guidelines and project overview.
+- minor: Migrated project configuration to pyproject.toml and simplified installation process.
+- minor: Update GitHub Actions to the latest version, and upgrade all dependencies.
+- patch: Converted Tests to use pytest syntax and fixtures.
+- patch: Improved README.md documentation with missing commands and examples.
+
 ## 2.2.0
 
 - minor: Update GitHub Actions to the latest version, and upgrade all dependencies
 
 ## 2.1.2
 
-- patch: Add test coverage calculation and GitHub Actions integration
+- patch: Add test coverage calculation and GitHub Actions integration.
 
 ## 2.1.1
 
-- patch: Add Python 3.14 to supported versions and CI test matrix
+- patch: Add Python 3.14 to supported versions and CI test matrix.
 
 ## 2.1.0
 
@@ -19,11 +32,11 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 ## 2.0.8
 
-- patch: Fix file creation race condition
+- patch: Fix file creation race condition.
 
 ## 2.0.7
 
-- patch: Fix deprecated datetime.utcnow() usage by replacing with datetime.now(timezone.utc) for Python 3.12+ compatibility
+- patch: Fix deprecated datetime.utcnow() usage by replacing with datetime.now(timezone.utc) for Python 3.12+ compatibility.
 
 ## 2.0.6
 
@@ -31,7 +44,7 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 ## 2.0.5
 
-- patch: move main logic into __main__.py
+- patch: move main logic into __main__.py.
 
 ## 2.0.4
 
@@ -65,11 +78,11 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 ## 1.6.0
 
-- minor: Decreased packaging minimum version requirements to version 21.0
+- minor: Decreased packaging minimum version requirements to version 21.0.
 
 ## 1.5.2
 
-- patch: Internal: improve CI/CD workflow
+- patch: Internal: improve CI/CD workflow.
 
 ## 1.5.1
 
@@ -88,7 +101,7 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 ## 1.4.0
 
 - minor: Add support for storing release datetime in order to display it in the changelog.
-- patch: All tests are now able to be run on Windows
+- patch: All tests are now able to be run on Windows.
 - patch: Fix: bug showing incorrect error using release command with no changesets created.
 
 ## 1.3.0
@@ -99,7 +112,7 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 ## 1.2.0
 
-- minor: Added command next-version, to compute the version of the next release, without actually performing the release
+- minor: Added command next-version, to compute the version of the next release, without actually performing the release.
 
 ## 1.1.0
 
@@ -122,88 +135,88 @@ Note: version releases in the 0.x.y range may introduce breaking changes.
 
 ## 0.13.0
 
-- minor: Add support for custom changelog template
-- patch: Fix security vulnerability with jinja2 CVE-2020-28493
+- minor: Add support for custom changelog template.
+- patch: Fix security vulnerability with jinja2 CVE-2020-28493.
 
 ## 0.12.0
 
-- minor: Improved performance by supporting multiple changeset files per second
-- minor: Status command now sorts unreleased changes by type and description in order to display consistent results
-- patch: Internal code refactor to improve code readability and maintanability
+- minor: Improved performance by supporting multiple changeset files per second.
+- minor: Status command now sorts unreleased changes by type and description in order to display consistent results.
+- patch: Internal code refactor to improve code readability and maintanability.
 
 ## 0.11.0
 
-- minor: Add '--version' filter to the 'changelog' command to display the changelog only for a specific version
+- minor: Add '--version' filter to the 'changelog' command to display the changelog only for a specific version.
 
 ## 0.10.0
 
-- minor: Add new 'status' command to display the state of the working directory and unreleased changes
-- patch: Fix build and deployment configuration
-- patch: Refactor method names and code for better code readability and testability
+- minor: Add new 'status' command to display the state of the working directory and unreleased changes.
+- patch: Fix build and deployment configuration.
+- patch: Refactor method names and code for better code readability and testability.
 
 ## 0.9.0
 
-- minor: Deprecated .changes directory in favour of .semversioner directory
-- patch: Internal refactor to improve code quality and test coverage
+- minor: Deprecated .changes directory in favour of .semversioner directory.
+- patch: Internal refactor to improve code quality and test coverage.
 
 ## 0.8.1
 
-- patch: Fix installer error when referencing to LICENSE file
+- patch: Fix installer error when referencing to LICENSE file.
 
 ## 0.8.0
 
-- minor: Enabled autocompletion by default
+- minor: Enabled autocompletion by default.
 
 ## 0.7.1
 
-- patch: Improve docs for open source
+- patch: Improve docs for open source.
 
 ## 0.7.0
 
-- minor: Fail with error code when no changes are provided in the release command
+- minor: Fail with error code when no changes are provided in the release command.
 
 ## 0.6.16
 
-- patch: Fix bug: add require module in setup.py
+- patch: Fix bug: add require module in setup.py.
 
 ## 0.6.15
 
-- patch: Fix packaging for LICENSE
-- patch: Improve README.md documentation
-- patch: Use jinja2 template engine internally to generate the changelog
+- patch: Fix packaging for LICENSE.
+- patch: Improve README.md documentation.
+- patch: Use jinja2 template engine internally to generate the changelog.
 
 ## 0.6.14
 
-- patch: Update docs
+- patch: Update docs.
 
 ## 0.6.13
 
-- patch: Fix README.md
+- patch: Fix README.md.
 
 ## 0.6.12
 
-- patch: Fix long description content type
+- patch: Fix long description content type.
 
 ## 0.6.11
 
-- patch: Add README.md file
+- patch: Add README.md file.
 
 ## 0.6.10
 
-- patch: Fix code consistency
+- patch: Fix code consistency.
 
 ## 0.6.9
 
-- patch: Fix packaging
+- patch: Fix packaging.
 
 ## 0.6.8
 
-- patch: Tag the repository when releasing
+- patch: Tag the repository when releasing.
 
 ## 0.6.7
 
-- patch: Fix tests and improve coverage
+- patch: Fix tests and improve coverage.
 
 ## 0.6.6
 
-- minor: Initial version
+- minor: Initial version.

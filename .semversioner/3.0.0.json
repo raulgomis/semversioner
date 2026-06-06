@@ -1,0 +1,46 @@
+{
+  "changes": [
+    {
+      "description": "Decoupled CLI from Core and Storage layers: remove internal click output, delegating UI responsibilities to the CLI module.",
+      "type": "major"
+    },
+    {
+      "description": "Drop support for Python 3.8.",
+      "type": "major"
+    },
+    {
+      "description": "Drop support for Python 3.9.",
+      "type": "major"
+    },
+    {
+      "description": "Replaced Flake8 and MyPy with Ruff. Adopted linting and formatting rules of the Ruff project.",
+      "type": "major"
+    },
+    {
+      "description": "Upgrade dependencies: click to 8.3.x, pytest to 9.x, pytest-cov to 7.x, importlib_resources to 7.x, mypy to 1.20.x, and flake8 to 7.3.x.",
+      "type": "major"
+    },
+    {
+      "description": "Added AGENTS.md with AI guidelines and project overview.",
+      "type": "minor"
+    },
+    {
+      "description": "Migrated project configuration to pyproject.toml and simplified installation process.",
+      "type": "minor"
+    },
+    {
+      "description": "Update GitHub Actions to the latest version, and upgrade all dependencies.",
+      "type": "minor"
+    },
+    {
+      "description": "Converted Tests to use pytest syntax and fixtures.",
+      "type": "patch"
+    },
+    {
+      "description": "Improved README.md documentation with missing commands and examples.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2026-06-06T14:51:54+00:00",
+  "version": "3.0.0"
+}
