@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Migrated project configuration to pyproject.toml and simplified installation process."
-}
