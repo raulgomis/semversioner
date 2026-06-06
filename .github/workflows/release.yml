@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -12,66 +16,17 @@ permissions:
   contents: read
 
 jobs:
-  prepare:
-    name: Prepare Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      new_version: ${{ steps.release-info.outputs.new_version }}
-    steps:
-    - uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v8.1.0
-      with:
-        python-version: '3.14'
-        enable-cache: true
-    
-    - name: Install dependencies
-      run: uv sync --all-extras --dev
-
-    - name: Prepare Release
-      id: release-info
-      run: |
-        # 1. Consolidate changes
-        uv run semversioner release
-        new_version=$(uv run semversioner current-version)
-        echo "new_version=${new_version}" >> $GITHUB_OUTPUT
-        
-        # 2. Update version and changelog
-        uv run semversioner changelog > CHANGELOG.md
-        echo "__version__ = \"$new_version\"" > semversioner/__version__.py
-        
-    - name: Upload release files
-      uses: actions/upload-artifact@v7
-      with:
-        name: release-files
-        path: |
-          CHANGELOG.md
-          semversioner/__version__.py
-          .semversioner/
-        retention-days: 1
-
   test:
     name: Test (Python ${{ matrix.python-version }})
-    needs: prepare
     runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
       matrix:
-        python-version: [ '3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: [ '3.10', '3.11', '3.12', '3.13', '3.14' ]
     steps:
     - uses: actions/checkout@v6
     
-    - name: Download release files
-      uses: actions/download-artifact@v7
-      with:
-        name: release-files
-
     - name: Install uv
       uses: astral-sh/setup-uv@v8.1.0
       with:
@@ -88,86 +43,66 @@ jobs:
 
     - name: Build and test
       run: |
-        uv run pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml
-
-    - name: Upload coverage results
-      uses: actions/upload-artifact@v7
-      with:
-        name: coverage-results-${{ matrix.python-version }}
-        path: coverage.xml
-      if: ${{ always() }}
-
-    - name: Upload pytest test results
-      uses: actions/upload-artifact@v7
-      with:
-        name: pytest-results-${{ matrix.python-version }}
-        path: junit/test-results-${{ matrix.python-version }}.xml
-      if: ${{ always() }}
+        uv run pytest --cov=semversioner --cov-report=term-missing --cov-report=xml
 
   release:
-    name: Commit, Tag and Build
-    needs: [prepare, test]
+    name: Release and Publish
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write # Required for Trusted Publishing
+    outputs:
+      has_changes: ${{ steps.release-run.outputs.has_changes }}
     steps:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Download release files
-      uses: actions/download-artifact@v7
-      with:
-        name: release-files
-
-    - name: Commit and Push Changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         
-        git add .
-        git commit -m "chore: release version ${{ needs.prepare.outputs.new_version }} [skip ci]"
-        git push origin master
-        
-    - name: Tag and Push
-      run: |
-        git tag -a -m "v${{ needs.prepare.outputs.new_version }}" "${{ needs.prepare.outputs.new_version }}"
-        git push origin "${{ needs.prepare.outputs.new_version }}"
-
     - name: Install uv
       uses: astral-sh/setup-uv@v8.1.0
       with:
         python-version: '3.14'
         enable-cache: true
-    
-    - name: Install dependencies
-      run: uv sync --all-extras --dev
+
+    - name: Install stable semversioner
+      run: uv pip install "semversioner==2.2.0" --system
+
+    - name: Check and Release
+      id: release-run
+      run: |
+        if semversioner check >/dev/null 2>&1; then
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          
+          # 1. Prepare Release
+          semversioner release
+          new_version=$(semversioner current-version)
+          semversioner changelog > CHANGELOG.md
+          echo "__version__ = \"$new_version\"" > semversioner/__version__.py
+          
+          # 2. Commit, Tag and Push Changes
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: release version $new_version [skip ci]"
+          git push origin master
+          
+          git tag -a -m "v$new_version" "$new_version"
+          git push origin "$new_version"
+        else
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changesets found. Bypassing release."
+        fi
 
     - name: Build Artifacts
+      if: steps.release-run.outputs.has_changes == 'true'
       run: |
         uv build
-        
-    - name: Upload Release Dists
-      uses: actions/upload-artifact@v7
-      with:
-        name: release-dists
-        path: dist/
 
-  publish:
-    name: Publish to PyPI
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Required for Trusted Publishing
-    steps: 
-    - name: Download Artifacts
-      uses: actions/download-artifact@v7
-      with:
-        name: release-dists
-        path: dist/
-        
     - name: Publish release distributions to PyPI
+      if: steps.release-run.outputs.has_changes == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: dist/
