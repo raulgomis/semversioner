@@ -67,7 +67,7 @@ jobs:
         enable-cache: true
 
     - name: Install stable semversioner
-      run: uv pip install "semversioner==2.2.0" --system
+      run: uv tool install semversioner==2.2.0
 
     - name: Check and Release
       id: release-run
