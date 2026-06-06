@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - feature/test-v3-workflow
 
 concurrency:
   group: release-${{ github.ref }}
