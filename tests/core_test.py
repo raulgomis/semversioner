@@ -255,3 +255,14 @@ def test_core_release_sequential_prerelease_flow(directory_name: str) -> None:
     releaser.add_change("major", "maj a1", pre="alpha")
     res = releaser.release()
     assert res.version == "1.0.0a1"
+
+
+def test_add_change_after_release_same_instance(directory_name: str) -> None:
+    """Ensure add_change works after a release using the same object."""
+    releaser = Semversioner(path=directory_name)
+    releaser.add_change("minor", "First")
+    releaser.release()
+
+    # Directory is removed during release but add_change should recreate it
+    path = releaser.add_change("patch", "Second")
+    assert os.path.isfile(path)
