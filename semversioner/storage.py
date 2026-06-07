@@ -108,10 +108,21 @@ class ReleaseJsonMapper:
         if "created_at" in data:  # New format
             created_at = datetime.fromisoformat(data["created_at"])
             version = data["version"]
-            changes = sorted(data["changes"], key=lambda k: k["type"] + k["description"])
+            changes_data = data["changes"]
         else:
-            changes = sorted(data, key=lambda k: k["type"] + k["description"])
+            changes_data = data
             version = release_identifier
+
+        changes = [
+            Changeset(
+                type=x["type"],
+                description=x["description"],
+                attributes=x.get("attributes"),
+                pre=x.get("pre"),
+            )
+            for x in changes_data
+        ]
+        changes = sorted(changes, key=lambda k: k.type + k.description)
 
         return Release(version=version, changes=changes, created_at=created_at)
 
@@ -159,6 +170,7 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
+        # Ensure next_release_path exists in case it was deleted by a previous release
         if not self.next_release_path.is_dir():
             self.next_release_path.mkdir(parents=True)
 

@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Add support for pre-release versions: alpha, beta, rc."
+}

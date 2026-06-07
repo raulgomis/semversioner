@@ -549,3 +549,73 @@ def test_non_empty_cli_execution_creating_correct_changeset_files(non_empty_next
     result = command_processor([["release"], ["changelog"]], directory_name)
     assert result.output == fixtures.CHANGELOG_6
     assert len(os.listdir(next_release_dirname)) == 1
+
+
+def test_cli_add_change_with_pre(directory_name, next_release_dirname) -> None:
+    commands = [
+        ["add-change", "--type", "patch", "--description", "Alpha change", "--pre", "alpha"],
+    ]
+
+    result = command_processor(commands, directory_name)
+
+    files = os.listdir(next_release_dirname)
+    assert len(files) == 1
+    with open(os.path.join(next_release_dirname, files[0])) as f:
+        data = json.load(f)
+
+    assert data == {"type": "patch", "description": "Alpha change", "pre": "alpha"}
+    assert "Successfully created file" in result.output
+
+
+def test_cli_release_prerelease(directory_name) -> None:
+    commands = [
+        ["add-change", "--type", "minor", "--description", "Alpha feature", "--pre", "alpha"],
+        ["release"],
+    ]
+    result = command_processor(commands, directory_name)
+    assert "Successfully created new release: 0.1.0a1" in result.output
+
+
+def test_cli_release_missing_changeset(directory_name) -> None:
+    # Test releasing when there are no changesets (MissingChangesetError).
+    result = single_command_processor(["release"], directory_name)
+    assert result.exit_code == 0
+    assert "Error: No changes to release. Skipping release process." in result.output
+
+
+def test_cli_add_change_invalid_prerelease_type(directory_name) -> None:
+    # Test add-change with an invalid prerelease type.
+    result = single_command_processor(
+        ["add-change", "--type", "patch", "--description", "Invalid prerelease", "--pre", "invalid"],
+        directory_name,
+    )
+    assert result.exit_code == 2
+    assert "Error: Invalid value for '--pre' / '-p': 'invalid' is not one of 'alpha', 'beta', 'rc'." in result.output
+
+
+def test_cli_mixed_stable_and_prerelease_error(directory_name) -> None:
+    # Test release, next-version, and status when both stable and prerelease changes exist.
+    # 1. Add stable and prerelease changes
+    commands = [
+        ["add-change", "--type", "minor", "--description", "Stable feature"],
+        ["add-change", "--type", "minor", "--description", "Alpha feature", "--pre", "alpha"],
+    ]
+    runner = CliRunner()
+    for command in commands:
+        result = runner.invoke(cli, ["--path", directory_name] + command)
+        assert result.exit_code == 0
+
+    # 2. Test status command fails cleanly
+    result_status = runner.invoke(cli, ["--path", directory_name, "status"])
+    assert result_status.exit_code != 0
+    assert "Error: Cannot have both stable and prerelease changes in the same release." in result_status.output
+
+    # 3. Test next-version command fails cleanly
+    result_next = runner.invoke(cli, ["--path", directory_name, "next-version"])
+    assert result_next.exit_code != 0
+    assert "Error: Cannot have both stable and prerelease changes in the same release." in result_next.output
+
+    # 4. Test release command fails cleanly
+    result_release = runner.invoke(cli, ["--path", directory_name, "release"])
+    assert result_release.exit_code != 0
+    assert "Error: Cannot have both stable and prerelease changes in the same release." in result_release.output
