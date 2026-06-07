@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 3.0.1
+
+- patch: Fix next-release folder recreation after release.
+
 ## 3.0.0
 
 - major: Decoupled CLI from Core and Storage layers: remove internal click output, delegating UI responsibilities to the CLI module.
