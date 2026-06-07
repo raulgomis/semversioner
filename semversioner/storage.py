@@ -159,6 +159,9 @@ class SemversionerFileSystemStorage(SemversionerStorage):
             Absolute path of the file generated.
         """
 
+        if not self.next_release_path.is_dir():
+            self.next_release_path.mkdir(parents=True)
+
         # Retry loop with atomic file creation to prevent race conditions
         while True:
             filename = f"{change.type}-{datetime.now(timezone.utc):%Y%m%d%H%M%S%f}.json"
