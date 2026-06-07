@@ -6,7 +6,7 @@ import threading
 import pytest
 
 from semversioner import ReleaseStatus, Semversioner
-from semversioner.models import Changeset, MissingChangesetError
+from semversioner.models import Changeset, MissingChangesetError, SemversionerError
 
 
 @pytest.fixture
@@ -161,3 +161,97 @@ def test_check_after_release(directory_name: str) -> None:
     releaser.add_change("major", "My description")
     releaser.release()
     assert not releaser.check()
+
+
+def test_get_next_version_prerelease(directory_name: str) -> None:
+    releaser = Semversioner(directory_name)
+
+    # 1. Test alpha prerelease patch bump from 0.0.0 -> 0.0.1a1
+    releaser.add_change("patch", "change 1", pre="alpha")
+    releaser.add_change("patch", "change 2", pre="alpha")
+    assert releaser.get_next_version() == "0.0.1a1"
+    releaser.release()
+    assert releaser.get_last_version() == "0.0.1a1"
+
+    # 2. Test beta prerelease bump from 0.0.1a1 -> 0.0.1b1
+    releaser.add_change("patch", "change 3", pre="beta")
+    assert releaser.get_next_version() == "0.0.1b1"
+    releaser.release()
+    assert releaser.get_last_version() == "0.0.1b1"
+
+    # 3. Test mixed stable and prerelease changes raises SemversionerError
+    releaser.add_change("patch", "stable change")
+    releaser.add_change("patch", "prerelease change", pre="alpha")
+    with pytest.raises(SemversionerError):
+        releaser.get_next_version()
+
+
+def test_core_status_with_prerelease(directory_name: str) -> None:
+    # Test status command with unreleased prerelease changes.
+    releaser = Semversioner(directory_name)
+    releaser.add_change("minor", "Alpha feature", pre="alpha")
+    status = releaser.get_status()
+    assert status.version == "0.0.0"
+    assert status.next_version == "0.1.0a1"
+    assert len(status.unreleased_changes) == 1
+    assert status.unreleased_changes[0].type == "minor"
+    assert status.unreleased_changes[0].description == "Alpha feature"
+    assert status.unreleased_changes[0].pre == "alpha"
+
+
+def test_core_next_version_with_prerelease(directory_name: str) -> None:
+    # Test next-version command with prerelease change.
+    releaser = Semversioner(directory_name)
+    releaser.add_change("minor", "Alpha feature", pre="alpha")
+    assert releaser.get_next_version() == "0.1.0a1"
+
+
+def test_core_mixed_stable_and_prerelease_error(directory_name: str) -> None:
+    # Test release, next-version, and status when both stable and prerelease changes exist.
+    releaser = Semversioner(directory_name)
+    releaser.add_change("minor", "Stable feature")
+    releaser.add_change("minor", "Alpha feature", pre="alpha")
+
+    with pytest.raises(SemversionerError, match="Cannot have both stable and prerelease changes in the same release."):
+        releaser.get_next_version()
+
+    with pytest.raises(SemversionerError, match="Cannot have both stable and prerelease changes in the same release."):
+        releaser.get_status()
+
+    with pytest.raises(SemversionerError, match="Cannot have both stable and prerelease changes in the same release."):
+        releaser.release()
+
+
+def test_core_release_sequential_prerelease_flow(directory_name: str) -> None:
+    # Test subsequent prerelease and stable release flows.
+    releaser = Semversioner(directory_name)
+
+    # Step 1: 0.0.0 -> 0.1.0a1 (minor alpha)
+    releaser.add_change("minor", "a1", pre="alpha")
+    res = releaser.release()
+    assert res.version == "0.1.0a1"
+
+    # Step 2: 0.1.0a1 -> 0.1.0a2 (minor alpha)
+    releaser.add_change("minor", "a2", pre="alpha")
+    res = releaser.release()
+    assert res.version == "0.1.0a2"
+
+    # Step 3: 0.1.0a2 -> 0.1.0b1 (minor beta)
+    releaser.add_change("minor", "b1", pre="beta")
+    res = releaser.release()
+    assert res.version == "0.1.0b1"
+
+    # Step 4: 0.1.0b1 -> 0.1.0rc1 (minor rc)
+    releaser.add_change("minor", "rc1", pre="rc")
+    res = releaser.release()
+    assert res.version == "0.1.0rc1"
+
+    # Step 5: 0.1.0rc1 -> 0.1.0 (minor stable)
+    releaser.add_change("minor", "stable")
+    res = releaser.release()
+    assert res.version == "0.1.0"
+
+    # Step 6: 0.1.0 -> 1.0.0a1 (major alpha)
+    releaser.add_change("major", "maj a1", pre="alpha")
+    res = releaser.release()
+    assert res.version == "1.0.0a1"

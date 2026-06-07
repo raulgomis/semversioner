@@ -37,7 +37,7 @@ import click
 
 from semversioner import __version__
 from semversioner.core import Semversioner
-from semversioner.models import MissingChangesetError, Release, ReleaseStatus
+from semversioner.models import MissingChangesetError, Release, ReleaseStatus, SemversionerError
 
 
 # Configure the logger for semversioner
@@ -96,6 +96,9 @@ def cli_release(ctx: click.Context) -> None:
         click.echo(message="Successfully created new release: " + result.version)
     except MissingChangesetError:
         click.secho("Error: No changes to release. Skipping release process.", fg="red")
+    except SemversionerError as e:
+        click.secho(f"Error: {e}", fg="red")
+        sys.exit(-1)
 
 
 @cli.command("changelog", help="Print the changelog.")
@@ -116,9 +119,12 @@ def cli_changelog(ctx: click.Context, version: str | None, template: TextIO | No
 @click.option("--type", "-t", "change_type", type=click.Choice(["major", "minor", "patch"]), required=True)
 @click.option("--description", "-d", required=True)
 @click.option("--attributes", multiple=True, callback=parse_key_value_pair, help="Attributes in key=value format.")
-def cli_add_change(ctx: click.Context, change_type: str, description: str, attributes: dict | None) -> None:
+@click.option("--pre", "-p", type=click.Choice(["alpha", "beta", "rc"]), help="Prerelease type.")
+def cli_add_change(
+    ctx: click.Context, change_type: str, description: str, attributes: dict | None, pre: str | None
+) -> None:
     releaser: Semversioner = ctx.obj["releaser"]
-    path: str = releaser.add_change(change_type, description, attributes)
+    path: str = releaser.add_change(change_type, description, attributes, pre)
     click.echo(message="Successfully created file " + path)
 
 
@@ -134,7 +140,11 @@ def cli_current_version(ctx: click.Context) -> None:
 @click.pass_context
 def cli_next_version(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj["releaser"]
-    version = releaser.get_next_version()
+    try:
+        version = releaser.get_next_version()
+    except SemversionerError as e:
+        click.secho(f"Error: {e}", fg="red")
+        sys.exit(-1)
     if version is None:
         click.secho(message="Error: No changes found. No next version available.", fg="red")
         sys.exit(-1)
@@ -146,7 +156,11 @@ def cli_next_version(ctx: click.Context) -> None:
 @click.pass_context
 def status(ctx: click.Context) -> None:
     releaser: Semversioner = ctx.obj["releaser"]
-    status_info: ReleaseStatus = releaser.get_status()
+    try:
+        status_info: ReleaseStatus = releaser.get_status()
+    except SemversionerError as e:
+        click.secho(f"Error: {e}", fg="red")
+        sys.exit(-1)
     click.echo(message=f"Version: {status_info.version}")
     if len(status_info.unreleased_changes) > 0:
         click.echo(message=f"Next version: {status_info.next_version}")

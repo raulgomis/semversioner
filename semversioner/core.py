@@ -9,7 +9,6 @@ from semversioner.models import (
     MissingChangesetError,
     Release,
     ReleaseStatus,
-    ReleaseType,
     SemversionerError,
 )
 from semversioner.storage import SemversionerFileSystemStorage
@@ -39,7 +38,9 @@ class Semversioner:
     def is_deprecated(self) -> bool:
         return self.fs.is_deprecated()
 
-    def add_change(self, change_type: str, description: str, attributes: dict[str, str] | None = None) -> str:
+    def add_change(
+        self, change_type: str, description: str, attributes: dict[str, str] | None = None, pre: str | None = None
+    ) -> str:
         """
         Create a new changeset file.
 
@@ -51,6 +52,7 @@ class Semversioner:
         change_type (str): Change type. Allowed values: major, minor, patch.
         description (str): Change description.
         attributes (dict): Change attributes (Optional).
+        pre (str): Prerelease type (Optional).
 
         Returns
         -------
@@ -58,7 +60,9 @@ class Semversioner:
             Absolute path of the file generated.
         """
 
-        return self.fs.create_changeset(Changeset(type=change_type, description=description, attributes=attributes))
+        return self.fs.create_changeset(
+            Changeset(type=change_type, description=description, attributes=attributes, pre=pre)
+        )
 
     def generate_changelog(self, version: str | None = None, template: str = DEFAULT_TEMPLATE) -> str:
         """
@@ -132,7 +136,7 @@ class Semversioner:
 
     def get_next_version(self) -> str | None:
         """
-        Gets the next version. Returns None is there are not changeset files created.
+        Gets the next version. Returns None if there are no changeset files created.
         """
         changes = self.fs.list_changesets()
         current_version_number = self.get_last_version()
@@ -140,9 +144,24 @@ class Semversioner:
         if len(changes) == 0:
             return None
 
+        # Check for mixed release types: stable vs prerelease
+        stable_changes = [x for x in changes if x.pre is None]
+        prerelease_changes = [x for x in changes if x.pre is not None]
+
+        if len(stable_changes) > 0 and len(prerelease_changes) > 0:
+            raise SemversionerError("Cannot have both stable and prerelease changes in the same release.")
+
+        prerelease_type = None
+        if len(prerelease_changes) > 0:
+            order = {"alpha": 1, "beta": 2, "rc": 3}
+            # Find the highest prerelease type among the changesets
+            prerelease_type = max((x.pre for x in prerelease_changes), key=lambda x: order.get(x, 0))
+
         release_type: str = sorted(x.type for x in changes)[0]
-        next_version: str = self._get_next_version_from_type(current_version_number, release_type)
-        return next_version
+        from semversioner.version import SemVersion
+
+        next_version = SemVersion(current_version_number).next_version(release_type, prerelease_type)
+        return next_version.to_string()
 
     def get_status(self) -> ReleaseStatus:
         """
@@ -166,15 +185,6 @@ class Semversioner:
         """
         Returns a string like '1.0.0'.
         """
-        # Convert to a list of ints: [1, 0, 0].
-        version_parts = [int(i) for i in current_version.split(".")]
-        if release_type == ReleaseType.PATCH.value:
-            version_parts[2] += 1
-        elif release_type == ReleaseType.MINOR.value:
-            version_parts[1] += 1
-            version_parts[2] = 0
-        elif release_type == ReleaseType.MAJOR.value:
-            version_parts[0] += 1
-            version_parts[1] = 0
-            version_parts[2] = 0
-        return ".".join(str(i) for i in version_parts)
+        from semversioner.version import SemVersion
+
+        return SemVersion(current_version).next_version(release_type).to_string()

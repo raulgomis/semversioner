@@ -38,6 +38,7 @@ class Changeset:
     type: str
     description: str
     attributes: dict[str, str] | None = None
+    pre: str | None = None
 
 
 @dataclass(frozen=True)
