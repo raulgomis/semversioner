@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from jinja2 import Template
+from jinja2.sandbox import SandboxedEnvironment
 
 from semversioner.models import (
     Changeset,
@@ -78,7 +78,7 @@ class Semversioner:
             releases = [x for x in releases if x.version == version]
 
         current_version = self.get_last_version()
-        return Template(template, trim_blocks=True).render(
+        return SandboxedEnvironment(trim_blocks=True).from_string(template).render(
             releases=releases,
             current_version=current_version,
         )
