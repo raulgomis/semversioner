@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Refactor list release numbers to use generator for better readability"
+}
