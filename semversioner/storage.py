@@ -223,5 +223,8 @@ class SemversionerFileSystemStorage(SemversionerStorage):
         return None
 
     def _list_release_numbers(self) -> list[str]:
-        files = [f.name for f in self.semversioner_path.iterdir() if f.is_file()]
-        return sorted((x[: -len(".json")] for x in files if x.endswith(".json")), key=lambda x: parse(x), reverse=True)
+        return sorted(
+            (f.stem for f in self.semversioner_path.iterdir() if f.is_file() and f.suffix == ".json"),
+            key=parse,
+            reverse=True,
+        )
