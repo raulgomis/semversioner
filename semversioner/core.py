@@ -78,9 +78,13 @@ class Semversioner:
             releases = [x for x in releases if x.version == version]
 
         current_version = self.get_last_version()
-        return SandboxedEnvironment(trim_blocks=True).from_string(template).render(
-            releases=releases,
-            current_version=current_version,
+        return (
+            SandboxedEnvironment(trim_blocks=True)
+            .from_string(template)
+            .render(
+                releases=releases,
+                current_version=current_version,
+            )
         )
 
     def release(self) -> Release:

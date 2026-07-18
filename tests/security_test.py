@@ -1,15 +1,18 @@
-import os
 import shutil
 import tempfile
+
 import pytest
 from jinja2.exceptions import SecurityError
+
 from semversioner import Semversioner
+
 
 @pytest.fixture
 def directory_name():
     dir_name = tempfile.mkdtemp()
     yield dir_name
     shutil.rmtree(dir_name)
+
 
 def test_generate_changelog_ssti_protection(directory_name: str) -> None:
     """
@@ -24,6 +27,7 @@ def test_generate_changelog_ssti_protection(directory_name: str) -> None:
         releaser.generate_changelog(template=payload)
 
     assert "access to attribute '__init__' of 'TemplateReference' object is unsafe" in str(excinfo.value)
+
 
 def test_generate_changelog_safe_template(directory_name: str) -> None:
     """
