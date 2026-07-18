@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "description": "Update README messaging for AI-native software delivery.",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2026-07-18T10:16:28+00:00",
+  "version": "3.0.2"
+}
