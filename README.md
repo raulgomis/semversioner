@@ -1,8 +1,10 @@
 # Semversioner
 
-The easiest way to manage [semantic versioning](https://semver.org/) in your project and generate `CHANGELOG.md` files automatically.
+**Release automation for AI-native software delivery.**
 
-Semversioner provides the tooling to automate the semver release process for libraries, docker images, microservices, and more.
+Semversioner makes it easy for developers and AI coding agents to manage
+[semantic versioning](https://semver.org/), capture changes, and generate `CHANGELOG.md` files automatically.
+It provides the tooling to automate releases for libraries, Docker images, microservices, and more.
 
 This project was inspired by the way AWS manages their versioning for [AWS-cli](https://github.com/aws/aws-cli/).
 
@@ -36,7 +38,7 @@ At any given time, the `.semversioner/` directory looks like:
 └── 1.1.2.json
 ```
 
-The release process takes everything in the `next-release` directory and aggregates them all together in a single JSON file for that release (e.g., `1.12.0.json`). This JSON file is a list of all the individual JSON files from `next-release`.
+The release process takes everything in the `next-release` directory and aggregates them all together in a single JSON file for that release (e.g., `1.12.0.json`). This JSON file is a list of all the individual JSON files from `next-release`, keeping release intent explicit and reviewable whether changes are authored by people or AI agents.
 
 ## Install
 
