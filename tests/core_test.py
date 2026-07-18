@@ -206,6 +206,30 @@ def test_core_next_version_with_prerelease(directory_name: str) -> None:
     assert releaser.get_next_version() == "0.1.0a1"
 
 
+def test_core_add_change_rejects_invalid_prerelease_type(directory_name: str) -> None:
+    releaser = Semversioner(directory_name)
+
+    with pytest.raises(
+        SemversionerError,
+        match=r"Invalid prerelease type 'preview'\. Expected one of: alpha, beta, rc\.",
+    ):
+        releaser.add_change("patch", "Preview feature", pre="preview")
+
+    assert not releaser.check()
+
+
+def test_core_add_change_rejects_invalid_change_type(directory_name: str) -> None:
+    releaser = Semversioner(directory_name)
+
+    with pytest.raises(
+        SemversionerError,
+        match=r"Invalid change type 'feature'\. Expected one of: major, minor, patch\.",
+    ):
+        releaser.add_change("feature", "New feature")
+
+    assert not releaser.check()
+
+
 def test_core_mixed_stable_and_prerelease_error(directory_name: str) -> None:
     # Test release, next-version, and status when both stable and prerelease changes exist.
     releaser = Semversioner(directory_name)

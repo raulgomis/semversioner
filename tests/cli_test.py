@@ -593,6 +593,36 @@ def test_cli_add_change_invalid_prerelease_type(directory_name) -> None:
     assert "Error: Invalid value for '--pre' / '-p': 'invalid' is not one of 'alpha', 'beta', 'rc'." in result.output
 
 
+def test_cli_next_version_invalid_prerelease_type_in_changeset(directory_name, next_release_dirname) -> None:
+    os.makedirs(next_release_dirname)
+    changeset_path = os.path.join(next_release_dirname, "patch-invalid-prerelease.json")
+    with open(changeset_path, "w") as changeset_file:
+        json.dump(
+            {"type": "patch", "description": "Invalid prerelease", "pre": "preview"},
+            changeset_file,
+        )
+
+    result = single_command_processor(["next-version"], directory_name)
+
+    assert result.exit_code != 0
+    assert "Error: Invalid prerelease type 'preview'. Expected one of: alpha, beta, rc." in result.output
+
+
+def test_cli_next_version_invalid_change_type_in_changeset(directory_name, next_release_dirname) -> None:
+    os.makedirs(next_release_dirname)
+    changeset_path = os.path.join(next_release_dirname, "invalid-change-type.json")
+    with open(changeset_path, "w") as changeset_file:
+        json.dump(
+            {"type": "feature", "description": "Invalid change type"},
+            changeset_file,
+        )
+
+    result = single_command_processor(["next-version"], directory_name)
+
+    assert result.exit_code != 0
+    assert "Error: Invalid change type 'feature'. Expected one of: major, minor, patch." in result.output
+
+
 def test_cli_mixed_stable_and_prerelease_error(directory_name) -> None:
     # Test release, next-version, and status when both stable and prerelease changes exist.
     # 1. Add stable and prerelease changes
