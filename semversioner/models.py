@@ -38,6 +38,18 @@ class Changeset:
     type: str
     description: str
     attributes: dict[str, str] | None = None
+    pre: str | None = None
+
+    def __post_init__(self) -> None:
+        allowed_change_types = {"major", "minor", "patch"}
+        if self.type not in allowed_change_types:
+            allowed_values = ", ".join(sorted(allowed_change_types))
+            raise SemversionerError(f"Invalid change type '{self.type}'. Expected one of: {allowed_values}.")
+
+        allowed_prerelease_types = {"alpha", "beta", "rc"}
+        if self.pre is not None and self.pre not in allowed_prerelease_types:
+            allowed_values = ", ".join(sorted(allowed_prerelease_types))
+            raise SemversionerError(f"Invalid prerelease type '{self.pre}'. Expected one of: {allowed_values}.")
 
 
 @dataclass(frozen=True)
