@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "description": "Fix Server-Side Template Injection (SSTI) in Jinja2 by using SandboxedEnvironment",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2026-07-18T12:42:11+00:00",
+  "version": "3.0.3"
+}

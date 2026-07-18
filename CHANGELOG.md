@@ -1,6 +1,10 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 3.0.3
+
+- patch: Fix Server-Side Template Injection (SSTI) in Jinja2 by using SandboxedEnvironment
+
 ## 3.0.2
 
 - patch: Update README messaging for AI-native software delivery.
