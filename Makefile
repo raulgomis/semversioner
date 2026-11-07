@@ -4,12 +4,13 @@ all: setup lint test coverage
 
 .PHONY: setup
 setup:
-	@uv sync --all-extras --dev
+	@uv sync --locked
 
 .PHONY: lint
 lint:
 	@uv run ruff check .
 	@uv run ruff format --check .
+	@uv run ty check
 
 .PHONY: test
 test:
@@ -22,5 +23,5 @@ coverage:
 .PHONY: clean
 clean:
 	@rm -vrf $(ENV)/
-	@rm -vrf .mypy_cache .pytest_cache __pycache__/* .coverage coverage.xml junit/*
+	@rm -vrf .mypy_cache .pytest_cache .ruff_cache __pycache__/* .coverage coverage.xml junit/*
 	@rm -vrf ./build ./dist ./*.pyc ./*.egg-info

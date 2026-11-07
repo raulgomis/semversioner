@@ -8,6 +8,9 @@ on:
     branches:    
       - 'feature/*'
       - 'fix/*'
+  pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -26,11 +29,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
         enable-cache: true
     - name: Install dependencies
-      run: uv sync --all-extras --dev
+      run: uv sync --locked
     - name: Lint code
       run: |
         uv run ruff check .
         uv run ruff format --check .
+        uv run ty check
     - name: Build and test
       run: |
         uv run pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=semversioner --cov-report=term-missing --cov-report=xml

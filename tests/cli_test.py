@@ -1,13 +1,10 @@
 import json
 import os
 import re
-import shutil
-import tempfile
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner, Result
-from importlib_resources import files
-from importlib_resources.abc import Traversable
 
 from semversioner import __version__
 from semversioner.cli import cli, parse_key_value_pair
@@ -32,13 +29,12 @@ def single_command_processor(command: list[str], path: str) -> Result:
     return result
 
 
-def get_file(filename: str) -> Traversable:
-    path: Traversable = files("tests.resources").joinpath(filename)
-    return path
+def get_file(filename: str) -> Path:
+    return Path(__file__).parent / "resources" / filename
 
 
 def read_file(filename: str) -> str:
-    return files("tests.resources").joinpath(filename).read_text()
+    return get_file(filename).read_text()
 
 
 # TestUtilsParseKeyValue
@@ -76,10 +72,8 @@ def test_empty_values_in_key_value_pairs() -> None:
 
 
 @pytest.fixture
-def directory_name():
-    dir_name = tempfile.mkdtemp()
-    yield dir_name
-    shutil.rmtree(dir_name)
+def directory_name(tmp_path: Path) -> str:
+    return str(tmp_path)
 
 
 @pytest.fixture
@@ -389,8 +383,8 @@ def test_cli_version(directory_name) -> None:
 
 # LegacyChangesDataTestCase
 @pytest.fixture
-def legacy_changes_dir():
-    directory_name = tempfile.mkdtemp()
+def legacy_changes_dir(tmp_path: Path) -> tuple[str, str, str]:
+    directory_name = str(tmp_path)
     changes_dirname = os.path.join(directory_name, ".changes")
     next_release_dirname = os.path.join(changes_dirname, "next-release")
     os.mkdir(changes_dirname)
@@ -398,8 +392,7 @@ def legacy_changes_dir():
         output.write(fixtures.VERSION_0_1_0)
     with open(os.path.join(changes_dirname, "0.2.0.json"), "w") as output:
         output.write(fixtures.VERSION_0_2_0)
-    yield directory_name, changes_dirname, next_release_dirname
-    shutil.rmtree(directory_name)
+    return directory_name, changes_dirname, next_release_dirname
 
 
 def test_legacy_generate_changelog_single_patch(legacy_changes_dir) -> None:
@@ -432,8 +425,8 @@ def test_legacy_generate_changelog_add_new_patch(legacy_changes_dir) -> None:
 
 # ExistingDataTestCase
 @pytest.fixture
-def existing_data_dir():
-    directory_name = tempfile.mkdtemp()
+def existing_data_dir(tmp_path: Path) -> tuple[str, str, str]:
+    directory_name = str(tmp_path)
     changes_dirname = os.path.join(directory_name, ".semversioner")
     next_release_dirname = os.path.join(changes_dirname, "next-release")
     os.makedirs(changes_dirname)
@@ -441,8 +434,7 @@ def existing_data_dir():
         output.write(fixtures.VERSION_0_1_0)
     with open(os.path.join(changes_dirname, "0.2.0.json"), "w") as output:
         output.write(fixtures.VERSION_0_2_0)
-    yield directory_name, changes_dirname, next_release_dirname
-    shutil.rmtree(directory_name)
+    return directory_name, changes_dirname, next_release_dirname
 
 
 def test_existing_generate_changelog_single_patch(existing_data_dir) -> None:
@@ -502,8 +494,8 @@ def test_existing_cli_execution_creating_correct_changeset_files(existing_data_d
 
 # NonEmptyNextReleaseFolder
 @pytest.fixture
-def non_empty_next_release_dir():
-    directory_name = tempfile.mkdtemp()
+def non_empty_next_release_dir(tmp_path: Path) -> tuple[str, str, str]:
+    directory_name = str(tmp_path)
     changes_dirname = os.path.join(directory_name, ".semversioner")
     next_release_dirname = os.path.join(changes_dirname, "next-release")
     os.makedirs(next_release_dirname)
@@ -511,10 +503,9 @@ def non_empty_next_release_dir():
         output.write(fixtures.VERSION_0_1_0)
     with open(os.path.join(changes_dirname, "0.2.0.json"), "w") as output:
         output.write(fixtures.VERSION_0_2_0)
-    with open(os.path.join(next_release_dirname, ".gitkeep"), "w") as output:
+    with open(os.path.join(next_release_dirname, ".gitkeep"), "w"):
         pass
-    yield directory_name, changes_dirname, next_release_dirname
-    shutil.rmtree(directory_name)
+    return directory_name, changes_dirname, next_release_dirname
 
 
 def test_non_empty_generate_changelog_single_patch(non_empty_next_release_dir) -> None:

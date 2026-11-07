@@ -1,0 +1,4 @@
+{
+  "type": "minor",
+  "description": "Add PEP 561 py.typed marker for downstream static type checking"
+}

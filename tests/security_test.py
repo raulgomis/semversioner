@@ -1,5 +1,4 @@
-import shutil
-import tempfile
+from pathlib import Path
 
 import pytest
 from jinja2.exceptions import SecurityError
@@ -8,10 +7,8 @@ from semversioner import Semversioner
 
 
 @pytest.fixture
-def directory_name():
-    dir_name = tempfile.mkdtemp()
-    yield dir_name
-    shutil.rmtree(dir_name)
+def directory_name(tmp_path: Path) -> str:
+    return str(tmp_path)
 
 
 def test_generate_changelog_ssti_protection(directory_name: str) -> None:

@@ -1,0 +1,4 @@
+{
+  "type": "patch",
+  "description": "Upgrade locked dependencies and add static type checking with ty in CI and Makefile"
+}

@@ -1,7 +1,6 @@
 import os
-import shutil
-import tempfile
 import threading
+from pathlib import Path
 
 import pytest
 
@@ -10,10 +9,8 @@ from semversioner.models import Changeset, MissingChangesetError
 
 
 @pytest.fixture
-def directory_name():
-    dir_name = tempfile.mkdtemp()
-    yield dir_name
-    shutil.rmtree(dir_name)
+def directory_name(tmp_path: Path) -> str:
+    return str(tmp_path)
 
 
 @pytest.fixture

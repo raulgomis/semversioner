@@ -11,11 +11,12 @@ The tool uses a workflow where individual "changesets" are created during develo
 ## 2. Tech Stack & Dependencies
 
 * **Language:** Python >= 3.10
+* **Package & Environment Manager:** `uv`
 * **CLI Framework:** `click`
 * **Templating:** `jinja2` (for changelog generation)
 * **Versioning parsing:** `packaging`
 * **Build System:** `setuptools` (`pyproject.toml` based)
-* **Linting & Formatting:** `ruff`
+* **Linting, Formatting & Type Checking:** `ruff`, `ty`
 * **Testing:** `pytest`, `pytest-cov`
 
 ## 3. Architecture & Core Components
@@ -38,9 +39,9 @@ The codebase is structured to separate concerns between the CLI interface, the b
 The project includes a `Makefile` that simplifies common tasks. **Always utilize these `make` targets during development.**
 
 * **Setup Environment:** `make setup`
-  Creates a virtual environment (`venv`), upgrades `pip`, and installs the package with its development dependencies (`pip install -e .[dev]`).
+  Syncs the virtual environment (`.venv`) and locked dependencies using `uv sync --locked`.
 * **Linting & Formatting:** `make lint`
-  Runs `ruff check .` for linting and `ruff format --check .` for code formatting checks. Ensure your code passes these checks before finalizing changes.
+  Runs `ruff check .` for linting, `ruff format --check .` for code formatting checks, and `ty check` for static type checking. Ensure your code passes these checks before finalizing changes.
 * **Testing:** `make test`
   Runs the test suite using `pytest`.
 * **Coverage:** `make coverage`

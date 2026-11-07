@@ -4,6 +4,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from packaging.version import parse
 
@@ -74,8 +75,8 @@ class EnhancedJSONEncoder(json.JSONEncoder):
     By default, the json.JSONEncoder class doesn't know how to encode dataclasses, so we define a custom encoding here.
     """
 
-    def default(self, o):
-        if dataclasses.is_dataclass(o):
+    def default(self, o: Any) -> Any:
+        if dataclasses.is_dataclass(o) and not isinstance(o, type):
             return dataclasses.asdict(o, dict_factory=lambda x: {k: v for (k, v) in x if v is not None})
         return super().default(o)
 
@@ -99,19 +100,24 @@ class ReleaseJsonMapper:
         return json.dumps(data, cls=EnhancedJSONEncoder, indent=2, sort_keys=True)
 
     @staticmethod
-    def from_json(data: dict, release_identifier: str) -> Release:
+    def from_json(data: dict[str, Any] | list[dict[str, Any]], release_identifier: str) -> Release:
         """
         Creates a Release object from a JSON-formatted string.
         """
         created_at: datetime | None = None
 
-        if "created_at" in data:  # New format
+        if isinstance(data, dict) and "created_at" in data:  # New format
             created_at = datetime.fromisoformat(data["created_at"])
-            version = data["version"]
-            changes = sorted(data["changes"], key=lambda k: k["type"] + k["description"])
+            version: str = data["version"]
+            raw_changes: list[dict[str, Any]] = data["changes"]
         else:
-            changes = sorted(data, key=lambda k: k["type"] + k["description"])
+            raw_changes = data if isinstance(data, list) else data["changes"]
             version = release_identifier
+
+        changes = sorted(
+            (Changeset(**change) for change in raw_changes),
+            key=lambda k: k.type + k.description,
+        )
 
         return Release(version=version, changes=changes, created_at=created_at)
 
