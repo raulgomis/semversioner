@@ -1,6 +1,13 @@
 # Changelog
 Note: version releases in the 0.x.y range may introduce breaking changes.
 
+## 3.1.0
+
+- minor: Add PEP 561 py.typed marker for downstream static type checking
+- minor: Return typed Changeset instances in Release.changes when deserializing releases
+- patch: Adopt PEP 639 license metadata and PEP 735 dependency-groups in pyproject.toml
+- patch: Upgrade locked dependencies and add static type checking with ty in CI and Makefile
+
 ## 3.0.3
 
 - patch: Fix Server-Side Template Injection (SSTI) in Jinja2 by using SandboxedEnvironment

@@ -1,4 +1,0 @@
-{
-  "type": "patch",
-  "description": "Adopt PEP 639 license metadata and PEP 735 dependency-groups in pyproject.toml"
-}

@@ -1,4 +1,0 @@
-{
-  "type": "minor",
-  "description": "Return typed Changeset instances in Release.changes when deserializing releases"
-}

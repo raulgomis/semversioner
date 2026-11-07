@@ -1,0 +1,22 @@
+{
+  "changes": [
+    {
+      "description": "Add PEP 561 py.typed marker for downstream static type checking",
+      "type": "minor"
+    },
+    {
+      "description": "Return typed Changeset instances in Release.changes when deserializing releases",
+      "type": "minor"
+    },
+    {
+      "description": "Adopt PEP 639 license metadata and PEP 735 dependency-groups in pyproject.toml",
+      "type": "patch"
+    },
+    {
+      "description": "Upgrade locked dependencies and add static type checking with ty in CI and Makefile",
+      "type": "patch"
+    }
+  ],
+  "created_at": "2026-11-07T06:05:54+00:00",
+  "version": "3.1.0"
+}
